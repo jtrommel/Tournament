@@ -94,11 +94,11 @@ JT.theme <- theme(panel.border = element_rect(fill = NA, colour = "gray10"),
 \section{Replication of the simulations by David J. Aldous}
 \subsection{Simulation Default Tournament Model}
 
-One run = 100 questions with true probabilities 0.05, 0.15, ..., 0.95, each appearing 10 times.
+One run = 100 questions with true probabilities 0.05, 0.15, ..., 0.95, each appearing 10 times. The forecaster chooses for each question a random probability\sidenote{random uniform distribution within [0,1]} in the range [0,1]. The score will of course be worse (a higher value) than when the forecaster each time makes a perfect choice. Because of the random nature of the choice, the forecaster will be lucky in some sets of 100 questions, and sometimes she/he will be unlucky. The end result will be spread around a mean value. The spread is given by the error $\epsilon$.
 <<label=DefTourMod,fig=TRUE,include=FALSE, echo=TRUE>>=
 set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and randomly chosen probabilities q in range [0,1]
-N <- 25000 # number of runs
+N <- 10000 # number of runs
 n <- 100 # number of questions per run
 total_score <- data.frame(term1=rep(0,N), term2=0, result=0)
 tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0)
@@ -117,16 +117,22 @@ perfect_score
 gem.term1 <- mean(total_score$term1)
 gem.term2 <- mean(total_score$term2)
 gem.result <- mean(total_score$result)
-sigma.sq <- gem.term2/n
 error_curve <- data.frame(x = seq(20, 46, by=0.1) , y = 0)
 error_curve$y <- dnorm(error_curve$x, 33.33, 1.75)
 ggplot(data=total_score, aes(x = result, y = ..density..)) +
   geom_histogram(data=total_score, aes(x = result, y = ..density..), 
                  binwidth=1, fill="lightblue", color="grey60", size=0.2) +
   geom_density(data=total_score, aes(x = result, y = ..density..)) +
-  geom_line(data=error_curve, aes(x = x, y = y), color="red") +
-  labs(title = "Distribution of Aldous scores for 25.000 tournaments", 
-       subtitle = "Each tournament has 100 questions",
+  # geom_line(data=error_curve, aes(x = x, y = y), color="red") +
+  geom_vline(xintercept=perfect_score, color="red", size=0.8) +
+  annotate("text", x= perfect_score, y= 0.04, label="perfect", color="red") +
+  annotate("text", x= perfect_score, y= 0.03, label="score", color="red") +
+  annotate("text", x= gem.result, y= 0.04, label="random", color="blue") +
+  annotate("text", x= gem.result, y= 0.03, label="choice", color="blue") +
+  geom_vline(xintercept=gem.result, color="blue", size=0.8) +
+  xlim(0, 50) +
+  labs(title = "Distribution of Aldous scores for 10.000 tournaments", 
+       subtitle = "Forecaster makes random choice",
        x = "Aldous Score", 
        y = "density") +
   JT.theme
@@ -140,6 +146,56 @@ ggplot(data=total_score, aes(x = result, y = ..density..)) +
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{figure}
 
+\subsection{A better forecaster}
+A better forecaster is someone who does not make a random choice of the probability, but will give a value which is closer to the real probability. Instead of making a random choice in the range [0,1], he/she will give a value in the range $[p-\sigma,p+\sigma]$ where $\sigma$ is the RMS error. Values for the forecasted probabilities must of course not go below 0 or above 1.
+
+<<echo=TRUE>>=
+set.seed(2018) # setting the random number generator
+# set up data frame with known probabilities p and randomly chosen probabilities q in range [0,1]
+N <- 1000 # number of runs
+n <- 100 # number of questions per run
+total_score <- data.frame(term1=rep(0,N), term2=0, result=0)
+tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0)
+sigma <- 0.5
+# i is number of runs
+for (i in (1:N)) {
+  for (j in (1:n)) {
+    tour_run$lower.limit[j] <- ifelse(tour_run$p[j] - sigma < 0, 0, tour_run$p[j] - sigma)
+    tour_run$upper.limit[j] <- ifelse(tour_run$p[j] + sigma > 1, 1, tour_run$p[j] + sigma)
+    tour_run$q[j] <- runif(1, tour_run$lower.limit[j], tour_run$upper.limit[j])
+  }
+  tour_run$question.score.term1 <- tour_run$p*(1-tour_run$p) 
+  tour_run$question.score.term2 <- (tour_run$q - tour_run$p)^2
+  tour_run$question.score <- tour_run$question.score.term1 + tour_run$question.score.term2
+  total_score$term1[i] <- sum(tour_run$question.score.term1)
+  total_score$term2[i] <- sum(tour_run$question.score.term2)
+  total_score$result[i] <- sum(tour_run$question.score)
+}
+perfect_score <- sum(tour_run$p*(1-tour_run$p))
+perfect_score
+gem.term1 <- mean(total_score$term1)
+gem.term1
+gem.term2 <- mean(total_score$term2)
+gem.term2
+gem.result <- mean(total_score$result)
+gem.result
+ggplot(data=total_score, aes(x = result, y = ..density..)) +
+  geom_histogram(data=total_score, aes(x = result, y = ..density..), 
+                 binwidth=1, fill="lightblue", color="grey60", size=0.2) +
+  geom_density(data=total_score, aes(x = result, y = ..density..)) +
+  geom_vline(xintercept=perfect_score, color="red", size=0.8) +
+  annotate("text", x= perfect_score, y= 0.04, label="perfect", color="red") +
+  annotate("text", x= perfect_score, y= 0.03, label="score", color="red") +
+  annotate("text", x= gem.result, y= 0.04, label="better", color="blue") +
+  annotate("text", x= gem.result, y= 0.03, label="choice", color="blue") +
+  geom_vline(xintercept=gem.result, color="blue", size=0.8) +
+  xlim(0, 50) +
+  labs(title = "Distribution of Aldous scores for 10.000 tournaments", 
+       subtitle = "Better Forecaster [p-sigma, p+sigma]",
+       x = "Aldous Score", 
+       y = "density") +
+  JT.theme
+@
 
 \newpage
 \textbf{Thanks} \\
