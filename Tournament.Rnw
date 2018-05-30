@@ -92,13 +92,35 @@ JT.theme <- theme(panel.border = element_rect(fill = NA, colour = "gray10"),
 \section{Score formula}
 \section{Expected value of the score}
 \section{Replication of the simulations by David J. Aldous}
-\subsection{Simulation Default Tournament Model}
+\subsection{The Ignorant Forecaster (Simulation Default Tournament Model)}
 
-One run = 100 questions with true probabilities 0.05, 0.15, ..., 0.95, each appearing 10 times. The forecaster chooses for each question a random probability\sidenote{random uniform distribution within [0,1]} in the range [0,1]. The score will of course be worse (a higher value) than when the forecaster each time makes a perfect choice. Because of the random nature of the choice, the forecaster will be lucky in some sets of 100 questions, and sometimes she/he will be unlucky. The end result will be spread around a mean value. The spread is given by the error $\epsilon$.
-<<label=DefTourMod,fig=TRUE,include=FALSE, echo=TRUE>>=
+One run = 100 questions with true probabilities 0.05, 0.15, ..., 0.95, each appearing 10 times. The \emph{Ignorant Forecaster} has no insight at all in the matter and chooses for each question a random probability\sidenote{random uniform distribution within [0,1]} in the range [0,1].
+
+His/Her average\sidenote{E(x) means the \emph{Expected Value} of x, more commonly known as the mean or average} score is given by:
+\begin{equation}
+\label{eq:ignorant}
+E(S_{ignorant})=\sum_{i=1}^{i=n}p_{i}(1-p_{i}) + \sum_{i=1}^{i=n}(q_{i}-p_{i})^{2} = \sum_{i=1}^{i=n}p_{i}(1-p_{i}) + n\sigma_{ignorant}^2
+\end{equation}
+
+You cannot do worse than this, so this score will be the \emph{maximum} value of the average score.
+
+His/Her counterpart is the \emph{Perfect Forecaster}. This forecaster mysteriously knows all true probabilities so that every time he/she makes a perfect choice: $q_{i}=p_{i}$. As a consequence the second term in \ref{eq:perfect} becomes zero.The score will be:
+\begin{equation}
+\label{eq:perfect}
+E(S_{perfect})=\sum_{i=1}^{i=n}p_{i}(1-p_{i})
+\end{equation}
+
+The perfect score will always be lower than the score of the \emph{Ignorant Forecaster} and will be the \emph{minimum} average score.
+
+Until now we worked with the average score. When we take one run of 100 questions, the \emph{Ignorant Forecaster} will pick\sidenote{It is of course the computer that will do the picking} 100 values for $q_{i} \quad i=1 \ldots n$. When we do a second run of 100 questions, he/she will pick another set of 100 values for $q_{i}$. Because of the random nature of this choice, the forecaster will be lucky in some runs and get a score beneath the average score. In other runs she/he will be unlucky and the score will be above the average value. When we do many runs, the scores will be spread around the average value. This spread is given by the error $\epsilon$.
+\begin{equation}
+S_{ignorant}=E(S_{ignorant}) + \epsilon = \sum_{i=1}^{i=n}p_{i}(1-p_{i}) + n\sigma_{ignorant}^2 + \epsilon
+\end{equation}
+
+<<label=Ignorant,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and randomly chosen probabilities q in range [0,1]
-N <- 10000 # number of runs
+N <- 1000 # number of runs
 n <- 100 # number of questions per run
 total_score <- data.frame(term1=rep(0,N), term2=0, result=0)
 tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0)
@@ -117,22 +139,20 @@ perfect_score
 gem.term1 <- mean(total_score$term1)
 gem.term2 <- mean(total_score$term2)
 gem.result <- mean(total_score$result)
-error_curve <- data.frame(x = seq(20, 46, by=0.1) , y = 0)
-error_curve$y <- dnorm(error_curve$x, 33.33, 1.75)
 ggplot(data=total_score, aes(x = result, y = ..density..)) +
   geom_histogram(data=total_score, aes(x = result, y = ..density..), 
                  binwidth=1, fill="lightblue", color="grey60", size=0.2) +
   geom_density(data=total_score, aes(x = result, y = ..density..)) +
   # geom_line(data=error_curve, aes(x = x, y = y), color="red") +
   geom_vline(xintercept=perfect_score, color="red", size=0.8) +
-  annotate("text", x= perfect_score, y= 0.04, label="perfect", color="red") +
-  annotate("text", x= perfect_score, y= 0.03, label="score", color="red") +
-  annotate("text", x= gem.result, y= 0.04, label="random", color="blue") +
-  annotate("text", x= gem.result, y= 0.03, label="choice", color="blue") +
+  annotate("text", x= perfect_score, y= 0.04, label="Perfect", color="red") +
+  annotate("text", x= perfect_score, y= 0.03, label="Forecaster", color="red") +
+  annotate("text", x= gem.result, y= 0.04, label="Ignorant", color="blue") +
+  annotate("text", x= gem.result, y= 0.03, label="Forecaster", color="blue") +
   geom_vline(xintercept=gem.result, color="blue", size=0.8) +
   xlim(0, 50) +
-  labs(title = "Distribution of Aldous scores for 10.000 tournaments", 
-       subtitle = "Forecaster makes random choice",
+  labs(title = paste("Distribution of Aldous scores for", N, "runs"), 
+       subtitle = "Ignorant Forecaster",
        x = "Aldous Score", 
        y = "density") +
   JT.theme
@@ -140,23 +160,34 @@ ggplot(data=total_score, aes(x = result, y = ..density..)) +
 
 \begin{figure}
 \centering
-\includegraphics[width=200pt, height=200pt]{Tour-DefTourMod}
-\caption{Simulation of \Sexpr{N} runs}
-\label{fig:DefTourMod}
+\includegraphics[width=200pt, height=200pt]{Tour-Ignorant}
+\caption{Ignorant Forecaster}
+\label{fig:Ignorant}
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{figure}
 
-\subsection{A better forecaster}
-A better forecaster is someone who does not make a random choice of the probability, but will give a value which is closer to the real probability. Instead of making a random choice in the range [0,1], he/she will give a value in the range $[p-\sigma,p+\sigma]$ where $\sigma$ is the RMS error. Values for the forecasted probabilities must of course not go below 0 or above 1.
+The score of the \emph{Perfect Forecaster} is fixed once we defined the values of $p_{i}$. With the choices in this example the perfect score is $\Sexpr{round(perfect_score,2)}$.
 
-<<echo=TRUE>>=
+\subsection{A Better Forecaster}
+A \emph{Better forecaster} is someone who does not make a random choice of the probability over the whole range [0,1] but, because he/she has information on the subject, will pick a value for $q_{i}$ that is closer to the real probability $p_{i}$. We simulate this by lettin him/her pick a value for $q_{i}$ randomly in the range $[p_{i}-\sigma,p_{i}+\sigma]$ where $\sigma^{2}$ is the RMS error:
+\begin{equation}
+\sigma^{2} = \frac{(q_{i}-p_{i})^2}{n}
+\end{equation}
+
+<<echo=FALSE>>=
+sigma.ignorant=sqrt(gem.term2/n)
+@
+The range will thus be $[p_{i}-\Sexpr{round(sigma.ignorant,2)},p_{i}+\Sexpr{round(sigma.ignorant,2)}]$. \sidenote{When the lower limit is smaller than 0, it will be trimmed to 0. Conversely: an upper limit above 1 will be trimmed to 1}
+
+<<label=Better,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
-# set up data frame with known probabilities p and randomly chosen probabilities q in range [0,1]
+# set up data frame with known probabilities p and 
+# randomly chosen probabilities q in range [p-sigma,p+sigma]
 N <- 1000 # number of runs
 n <- 100 # number of questions per run
 total_score <- data.frame(term1=rep(0,N), term2=0, result=0)
 tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0)
-sigma <- 0.5
+sigma <- sigma.ignorant
 # i is number of runs
 for (i in (1:N)) {
   for (j in (1:n)) {
@@ -171,31 +202,79 @@ for (i in (1:N)) {
   total_score$term2[i] <- sum(tour_run$question.score.term2)
   total_score$result[i] <- sum(tour_run$question.score)
 }
-perfect_score <- sum(tour_run$p*(1-tour_run$p))
-perfect_score
-gem.term1 <- mean(total_score$term1)
-gem.term1
 gem.term2 <- mean(total_score$term2)
-gem.term2
 gem.result <- mean(total_score$result)
-gem.result
 ggplot(data=total_score, aes(x = result, y = ..density..)) +
   geom_histogram(data=total_score, aes(x = result, y = ..density..), 
                  binwidth=1, fill="lightblue", color="grey60", size=0.2) +
   geom_density(data=total_score, aes(x = result, y = ..density..)) +
   geom_vline(xintercept=perfect_score, color="red", size=0.8) +
-  annotate("text", x= perfect_score, y= 0.04, label="perfect", color="red") +
-  annotate("text", x= perfect_score, y= 0.03, label="score", color="red") +
-  annotate("text", x= gem.result, y= 0.04, label="better", color="blue") +
-  annotate("text", x= gem.result, y= 0.03, label="choice", color="blue") +
+  annotate("text", x= perfect_score, y= 0.06, label="Perfect", color="red") +
+  annotate("text", x= perfect_score, y= 0.03, label="Forecaster", color="red") +
+  annotate("text", x= gem.result, y= 0.16, label="Better", color="blue") +
+  annotate("text", x= gem.result, y= 0.13, label="Forecaster", color="blue") +
   geom_vline(xintercept=gem.result, color="blue", size=0.8) +
   xlim(0, 50) +
-  labs(title = "Distribution of Aldous scores for 10.000 tournaments", 
-       subtitle = "Better Forecaster [p-sigma, p+sigma]",
+  labs(title = paste("Distribution of Aldous scores for", N, "runs"), 
+       subtitle = "Better Forecaster",
        x = "Aldous Score", 
        y = "density") +
   JT.theme
 @
+
+\begin{figure}
+\centering
+\includegraphics[width=200pt, height=200pt]{Tour-Better}
+\caption{Better Forecaster}
+\label{fig:Better}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{figure}
+
+As we expected, the scores of the \emph{Better Forecaster} are lower. It should be noted that the spread of the scores around the average score of the \emph{Better Forecaster} is smaller than the spread around the average score of the \emph{Ignorant Forecaster} in Figure~\ref{fig:Ignorant}
+
+\section{Comparing two contestants}
+When a forecaster gets closer to the perfect score, he/she is considered to be improving. When comparing two contestants, we could look at there average score over many runs: the Contestant with the lowest average score is the better one. However, when we look at only one run, it could be that the Contestant with the higher average score still performs better than the Contestant with the lower average score. This is of course due to the spread of the scores \emph{around} the average value. By luck, Contestant 2 could be to the left of his/her average, while Contestant 1 could be to the right of his/her average. And it could happen that the score of Contestant 2 is better than the score of Contestant 1. This seems in accordance with our intuition: the better player wins most of the time, but not always. As the difference of ability increases, the probability for a win for the better player increases.
+
+<<label=Compare,fig=TRUE,include=FALSE, echo=FALSE>>=
+set.seed(2018) # setting the random number generator
+# set up data frame with known probabilities p and 
+# randomly chosen probabilities q in range [p-sigma,p+sigma]
+N <- 100 # number of runs
+n <- 100 # number of questions per run
+total_score <- data.frame(Contestant1=rep(0,N), Contestant2=0)
+tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0)
+winC1 <- 0
+winC2 <- 0
+sigma_C1 <- 0.1
+sigma_C2 <- 0.15
+for (i in (1:N)) {
+  for (j in (1:n)) {
+    tour_run$lower.limitC1[j] <- ifelse(tour_run$p[j] - sigma_C1 < 0, 0, tour_run$p[j] - sigma_C1)
+    tour_run$upper.limitC1[j] <- ifelse(tour_run$p[j] + sigma_C1 > 1, 1, tour_run$p[j] + sigma_C1)
+    tour_run$q1[j] <- runif(1, tour_run$lower.limitC1[j], tour_run$upper.limitC1[j])
+    tour_run$lower.limitC2[j] <- ifelse(tour_run$p[j] - sigma_C2 < 0, 0, tour_run$p[j] - sigma_C2)
+    tour_run$upper.limitC2[j] <- ifelse(tour_run$p[j] + sigma_C2 > 1, 1, tour_run$p[j] + sigma_C2)
+    tour_run$q2[j] <- runif(1, tour_run$lower.limitC2[j], tour_run$upper.limitC2[j])
+  }
+  tour_run$question.score.term1 <- tour_run$p*(1-tour_run$p) 
+  tour_run$question.score.term2.C1 <- (tour_run$q1 - tour_run$p)^2
+  tour_run$question.score.term2.C2 <- (tour_run$q2 - tour_run$p)^2
+  tour_run$question.score.C1 <- tour_run$question.score.term1 + tour_run$question.score.term2.C1
+  tour_run$question.score.C2 <- tour_run$question.score.term1 + tour_run$question.score.term2.C2
+  total_score$Contestant1[i] <- sum(tour_run$question.score.C1)
+  total_score$Contestant2[i] <- sum(tour_run$question.score.C2)
+  if(total_score$Contestant1[i] == total_score$Contestant2[i]) {
+    winC1 <- winC1 + 0.5
+    winC2 <- winC2 + 0.5
+  }
+  ifelse(total_score$Contestant1[i] < total_score$Contestant2[i], winC1 <- winC1+1, winC2 <- winC2+1)
+}
+winC1
+winC2
+winC1 + winC2
+@
+
+
 
 \newpage
 \textbf{Thanks} \\
