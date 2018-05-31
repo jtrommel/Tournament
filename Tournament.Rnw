@@ -61,6 +61,7 @@
 <<echo=FALSE>>=
 library(tidyverse)
 library(gridExtra)
+library(xtable)
 @
 
 % Setting the ggplot theme:
@@ -226,6 +227,10 @@ E(S_{perfect})=\sum_{i=1}^{i=n}p_{i}(1-p_{i})
 
 The score of the \emph{Perfect Forecaster} is fixed once we defined the values of $p_{i}$. With the choices in this example the perfect score is $16.75$.
 
+<<>>=
+Aldous <- TRUE
+@
+
 <<label=Perfect,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and randomly chosen probabilities q in range [0,1]
@@ -347,7 +352,9 @@ for (i in (1:N)) {
   for (j in (1:n)) {
     tour_run$lower.limit[j] <- ifelse(tour_run$p[j] - sigma < 0, 0, tour_run$p[j] - sigma)
     tour_run$upper.limit[j] <- ifelse(tour_run$p[j] + sigma > 1, 1, tour_run$p[j] + sigma)
-    tour_run$q[j] <- runif(1, tour_run$lower.limit[j], tour_run$upper.limit[j])
+    ifelse(Aldous==TRUE, 
+           tour_run$q[j] <- sample(c(tour_run$lower.limit[j], tour_run$upper.limit[j]),1) ,
+           tour_run$q[j] <- runif(1, tour_run$lower.limit[j], tour_run$upper.limit[j]))
   }
   for (j in (1:n)) {tour_run$event[j] <- rbinom(1,1,tour_run$p[j])} # the event happens or not
   tour_run$question.score <- (tour_run$event - tour_run$q)^2
@@ -394,8 +401,13 @@ When comparing two contestants, we could look at their \emph{average total score
 set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and 
 # randomly chosen probabilities q in range [p-sigma,p+sigma]
-N <- 100 # number of runs
+N <- 1000 # number of runs
 n <- 100 # number of questions per run
+percentage_win_C1 <- data.frame(matrix(0, ncol = 7, nrow = 7))
+colnames(percentage_win_C1) <- as.character(seq(0, 0.3, by=0.05))
+rownames(percentage_win_C1) <- as.character(seq(0, 0.3, by=0.05))
+for (p1 in (1:7)) {
+  for (p2 in (p1:7)) {
 total_score_contest <- data.frame(Contestant1=rep(0,N), Contestant2=0)
 tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), 
                        q1 = 0, q2=0,
@@ -404,16 +416,20 @@ tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10),
                        event=0)
 winC1 <- 0
 winC2 <- 0
-sigma_C1 <- 0
-sigma_C2 <- 0.2
+sigma_C1 <- (p1-1)*0.05
+sigma_C2 <- (p2-1)*0.05
 for (i in (1:N)) {
   for (j in (1:n)) {
     tour_run$lower.limitC1[j] <- ifelse(tour_run$p[j] - sigma_C1 < 0, 0, tour_run$p[j] - sigma_C1)
     tour_run$upper.limitC1[j] <- ifelse(tour_run$p[j] + sigma_C1 > 1, 1, tour_run$p[j] + sigma_C1)
-    tour_run$q1[j] <- runif(1, tour_run$lower.limitC1[j], tour_run$upper.limitC1[j])
+    ifelse(Aldous==TRUE, 
+           tour_run$q1[j] <- sample(c(tour_run$lower.limitC1[j], tour_run$upper.limitC1[j]),1) ,
+           tour_run$q1[j] <- runif(1, tour_run$lower.limitC1[j], tour_run$upper.limitC1[j]))
     tour_run$lower.limitC2[j] <- ifelse(tour_run$p[j] - sigma_C2 < 0, 0, tour_run$p[j] - sigma_C2)
     tour_run$upper.limitC2[j] <- ifelse(tour_run$p[j] + sigma_C2 > 1, 1, tour_run$p[j] + sigma_C2)
-    tour_run$q2[j] <- runif(1, tour_run$lower.limitC2[j], tour_run$upper.limitC2[j])
+    ifelse(Aldous==TRUE, 
+           tour_run$q2[j] <- sample(c(tour_run$lower.limitC2[j], tour_run$upper.limitC2[j]),1) ,
+           tour_run$q2[j] <- runif(1, tour_run$lower.limitC2[j], tour_run$upper.limitC2[j]))
   }
   for (j in (1:n)) {tour_run$event[j] <- rbinom(1,1,tour_run$p[j])} # the event happens or not
   tour_run$question.score.C1 <- (tour_run$event - tour_run$q1)^2
@@ -426,11 +442,14 @@ for (i in (1:N)) {
   }
   ifelse(total_score_contest$Contestant1[i] < total_score_contest$Contestant2[i], winC1 <- winC1+1, winC2 <- winC2+1)
 }
-winC1
-winC2
-winC1 + winC2
+percentage_win_C1[p1,p2] <- winC1/N
+  }
+}
 @
 
+<<>>=
+percentage_win_C1  
+@
 
 
 \newpage
