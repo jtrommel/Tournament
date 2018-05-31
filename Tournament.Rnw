@@ -292,7 +292,8 @@ tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0, event=0)
 # simulating N tournaments
 for (i in (1:N)) {
   tour_run$q = runif(n) # The ignorant forecaster just picks a value in the range [0,1]
-  for (j in (1:n)) {tour_run$event[j] <- rbinom(1,1,tour_run$p[j])} # the event happens or not
+#  for (j in (1:n)) {tour_run$event[j] <- rbinom(1,1,tour_run$p[j])} # the event happens or not
+  tour_run$event <- rbinom(n,1,tour_run$p)
   tour_run$question.score <- (tour_run$event - tour_run$q)^2
   total_score_ignorant$result[i] <- sum(tour_run$question.score)
 }
@@ -349,14 +350,15 @@ sigma <- 0.41
 # i is number of tournaments
 for (i in (1:N)) {
    # The better forecaster picks a value in the range [p-sigma,p+sigma]
+  tour_run$lower.limit <- ifelse(tour_run$p - sigma < 0, 0, tour_run$p + sigma)
+  tour_run$upper.limit <- ifelse(tour_run$p + sigma > 1, 1, tour_run$p + sigma)
   for (j in (1:n)) {
-    tour_run$lower.limit[j] <- ifelse(tour_run$p[j] - sigma < 0, 0, tour_run$p[j] - sigma)
-    tour_run$upper.limit[j] <- ifelse(tour_run$p[j] + sigma > 1, 1, tour_run$p[j] + sigma)
     ifelse(Aldous==TRUE, 
            tour_run$q[j] <- sample(c(tour_run$lower.limit[j], tour_run$upper.limit[j]),1) ,
            tour_run$q[j] <- runif(1, tour_run$lower.limit[j], tour_run$upper.limit[j]))
   }
-  for (j in (1:n)) {tour_run$event[j] <- rbinom(1,1,tour_run$p[j])} # the event happens or not
+#  for (j in (1:n)) {tour_run$event[j] <- rbinom(1,1,tour_run$p[j])} # the event happens or not
+  tour_run$event <- rbinom(n,1,tour_run$p)
   tour_run$question.score <- (tour_run$event - tour_run$q)^2
   total_score_better$result[i] <- sum(tour_run$question.score)
 }
