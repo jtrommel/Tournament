@@ -84,76 +84,229 @@ JT.theme <- theme(panel.border = element_rect(fill = NA, colour = "gray10"),
 % Functions
 
 \frontmatter
-\chapter*{Prediction Tournament Paradox}
+\chapter*{Notes on ''Prediction Tournament Paradox"}
 
 \mainmatter
 \chapter{Scores}
 
-\section{Score formula}
-\section{Expected value of the score}
-\section{Replication of the simulations by David J. Aldous}
-\subsection{The Ignorant Forecaster (Simulation Default Tournament Model)}
+\section{Forecasting and calculating the score}
 
-One run = 100 questions with true probabilities 0.05, 0.15, ..., 0.95, each appearing 10 times. The \emph{Ignorant Forecaster} has no insight at all in the matter and chooses for each question a random probability\sidenote{random uniform distribution within [0,1]} in the range [0,1].
+A \emph{tournament} consists of a number of questions. To keep things uncluttered I start with 10 questions. All these questions have an, unknown, probability $p_{i} \quad i=1 \ldots 10$ that they will actually happen before or on a specific date. Let's assume that some questions deal with events that are very unlikely (low $p_{i}$), some are a toss up, and some are highly likely (high $p_{i}$). A forecaster\sidenote{To avoid to write every time ''he/she", from now on I will assume the forecaster to be female} proposes for each question a probability $q_{i} \quad i=1 \ldots 10$ that the event will occur. The choices she makes depend of course on the knowledge she has on the subject matter of the question in case. The situation before the expiry date looks something like this\sidenote{I've ordered the questions from very unlikely to very likely}:
 
-His/Her average\sidenote{E(x) means the \emph{Expected Value} of x, more commonly known as the mean or average} score is given by:
+\medskip
+
+\begin{table}
+\caption{Before expiry date}
+\centering
+\begin{tabular}{ c | c | c | }
+  question & $p_{i}$ & $q_{i}$ \\
+  \hline
+  1 & 0.05 & 0.14 \\
+  2 & 0.15 & 0.06 \\
+  3 & 0.25 & 0.19 \\
+  4 & 0.35 & 0.43 \\
+  5 & 0.45 & 0.23 \\
+  6 & 0.55 & 0.71 \\
+  7 & 0.65 & 0.66 \\
+  8 & 0.75 & 0.81 \\
+  9 & 0.85 & 0.69 \\
+  10 & 0.95 & 1
+\end{tabular}
+\label{table:before}
+\end{table}
+
+\medskip
+
+When the expiry date arrives, things change. Either the event has happened (result=1) or it has not (result=0). For events  with a low probability $p_{i}$ most of the time the result will be 0. But there can be surprises and a low probability event can in fact occur (see question 2 in Table~\ref{table:after}). Idem for events with a high probability: every now and then they do not materialise (see question 8 in Table~\ref{table:after}). Events with medium probabilities will be even more prone to chance. For each question a score is calculates using the formula:
 \begin{equation}
-\label{eq:ignorant}
-E(S_{ignorant})=\sum_{i=1}^{i=n}p_{i}(1-p_{i}) + \sum_{i=1}^{i=n}(q_{i}-p_{i})^{2} = \sum_{i=1}^{i=n}p_{i}(1-p_{i}) + n\sigma_{ignorant}^2
+score_{i}=(result_{i} - q_{i})^2
 \end{equation}
 
-You cannot do worse than this, so this score will be the \emph{maximum} value of the average score.
+\medskip
 
-His/Her counterpart is the \emph{Perfect Forecaster}. This forecaster mysteriously knows all true probabilities so that every time he/she makes a perfect choice: $q_{i}=p_{i}$. As a consequence the second term in \ref{eq:perfect} becomes zero.The score will be:
+\begin{table}
+\caption{After expiry date}
+\centering
+\begin{tabular}{ c | c | c || c | c}
+  question & $p_{i}$ & $q_{i}$ & $result_{i}$ & $score_{i}$\\
+  \hline
+  1 & 0.05 & 0.14 & 0 & $0.14^{2}=0.0196$\\
+  2 & 0.15 & 0.06 & 1 & $0.94^{2}=0.8836$\\
+  3 & 0.25 & 0.19 & 0 & $0.19^{2}=0.0361$\\
+  4 & 0.35 & 0.43 & 0 & $0.43^{2}=0.1849$\\
+  5 & 0.45 & 0.23 & 1 & $0.77^{2}=0.5929$\\
+  6 & 0.55 & 0.71 & 1 & $0.29^{2}=0.0841$\\
+  7 & 0.65 & 0.66 & 0 & $0.66^{2}=0.4356$\\
+  8 & 0.75 & 0.81 & 0 & $0.81^{2}=0.6561$\\
+  9 & 0.85 & 0.69 & 1 & $0.31^{2}=0.0961$\\
+  10 & 0.95 & 1 & 1 & $0^{2}=0$\\
+  \hline
+   &  &  &  & $2.989$
+\end{tabular}
+\label{table:after}
+\end{table}
+
+\medskip
+
+\newthought{It is very important to realise} that if we run a second tournament with 10 questions with the same probabilities $p_{i}$, and the forecaster would give exactly the same answers for the probabilities $q_{i}$, the total score could be different! This is because of the intermediate step where at the expiry date the event changes from a \emph{probability} into a \emph{reality}: it happens or it does not happen. An event with probability 30\% could ''not happen" in the first tournament, but materialise in the second tournament. So it could be that in tournament 2 we get the following results (note the change in the result for questions 2 and 8):
+
+\medskip
+
+\begin{table}
+\caption{Tournament 2}
+\centering
+\begin{tabular}{ c | c | c || c | c}
+  question & $p_{i}$ & $q_{i}$ & $result_{i}$ & $score_{i}$\\
+  \hline
+  1 & 0.05 & 0.14 & 0 & $0.14^{2}=0.0196$\\
+  2 & 0.15 & 0.06 & 0 & $0.06^{2}=0.0036$\\
+  3 & 0.25 & 0.19 & 0 & $0.19^{2}=0.0361$\\
+  4 & 0.35 & 0.43 & 0 & $0.43^{2}=0.1849$\\
+  5 & 0.45 & 0.23 & 1 & $0.77^{2}=0.5929$\\
+  6 & 0.55 & 0.71 & 1 & $0.29^{2}=0.0841$\\
+  7 & 0.65 & 0.66 & 0 & $0.66^{2}=0.4356$\\
+  8 & 0.75 & 0.81 & 1 & $0.19^{2}=0.0361$\\
+  9 & 0.85 & 0.69 & 1 & $0.31^{2}=0.0961$\\
+  10 & 0.95 & 1 & 1 & $0^{2}=0$\\
+  \hline
+   &  &  &  & $1.489$
+\end{tabular}
+\label{table:tournament2}
+\end{table}
+
+\medskip
+
+The same forecaster, giving the same predictions based on her knowledge about questions with the same probabilities, will get a different score because there is an uncontrollable factor ''chance" that makes the event happen on one occasion but not on the other. From this it follows that if we run 1000 tournaments with 100 questions with the same actual probabilities, and the forecaster gives the same estimate for the probability that the event will occur, we will get 1000 slightly different total scores. In short: the total score will show some variation around an average value of the total score.
+
+\section{Expected value of the score}
+
+The \emph{Expected} (or average) \emph{value} of the total score can be calculated. If we have a variable that depends on chance (such as the total score) it can have different values with different probabilities. In our case the score on question $i$ can have two values:
+\begin{equation}
+  \begin{split}
+  \text{if the event occurs:} & \quad  score_{i}=(1-q_{i})^2 \\
+  \text{if the event does not occur:} & \quad score_{i}=(q_{i})^2
+  \end{split}
+\end{equation}
+
+The probablities that the event occurs or not are:
+\begin{equation}
+  \begin{split}
+  \text{probability that the event occurs=} & p_{i} \\
+  \text{probability that the event does not occur=} & (1-p_{i})
+  \end{split}
+\end{equation}
+
+You can find the \emph{Expected Value} of the score by multiplying the possible scores with their probability and adding the results:
+\begin{equation}
+  \begin{split}
+    E(score_{i})&=(1-q_{i})^2(p_{i}) + (q_{i})^2(1-p_{i}) \\
+    &= (p_{i} - 2p_{i}q_{i} + p_{i}q_{i}^2) + (q_{i}^{2}-p_{i}q_{i}^{2}) \\
+    &= p_{i} - 2p_{i}q_{i}+q_{i}^{2} \\
+    &=p_{i} - p_{i}^{2} + p_{i}^{2} - 2p_{i}q_{i}+q_{i}^{2} \\
+    &= p_{i}(1-p_{i}) + (q_{i}-p_{i})^{2}
+  \end{split}
+\end{equation}
+
+The total average score is the sum of all the average question scores:
+\begin{equation}
+E(score_{total})=E(\sum_{i=1}^{i=n}score_{i})=\sum_{i=1}^{i=n}p_{i}(1-p_{i}) + \sum_{i=1}^{i=n}(q_{i}-p_{i})^{2}
+\label{eq:meantotal}
+\end{equation}
+
+\section{A tale of three forecasters}
+
+We are going to look at the scores of three different forecasters. Each forecaster will take part in N tournaments\sidenote{N can be very large e.g. 10.000. It's just the computer doing all the work.} Each tournament has 100 question: 10 questions with a probability of occurence $p=0.05$, 10 questions with probability of occurence $p=0.15$, and so on in steps of $0.10$, until the last set of 10 questions with probability of occurence $p=0.95$.
+
+\subsection{The Perfect Forecaster}
+This forecaster is faultless: for every question she ''knows" the exact probability. So for every question her choice $q_{i}$ of the probability of occurence is exactly equal to $p_{i}$ of this specific question. We can calculate the expected value of the total score of the Perfect Forecaster using Equation~\ref{eq:meantotal}. The second term in this equation is always 0 because the Perfect Forecaster always chooses $q_{i}=p_{i}$:
 \begin{equation}
 \label{eq:perfect}
 E(S_{perfect})=\sum_{i=1}^{i=n}p_{i}(1-p_{i})
 \end{equation}
 
-The perfect score will always be lower than the score of the \emph{Ignorant Forecaster} and will be the \emph{minimum} average score.
+The score of the \emph{Perfect Forecaster} is fixed once we defined the values of $p_{i}$. With the choices in this example the perfect score is $16.75$.
 
-Until now we worked with the average score. When we take one run of 100 questions, the \emph{Ignorant Forecaster} will pick\sidenote{It is of course the computer that will do the picking} 100 values for $q_{i} \quad i=1 \ldots n$. When we do a second run of 100 questions, he/she will pick another set of 100 values for $q_{i}$. Because of the random nature of this choice, the forecaster will be lucky in some runs and get a score beneath the average score. In other runs she/he will be unlucky and the score will be above the average value. When we do many runs, the scores will be spread around the average value. This spread is given by the error $\epsilon$.
+<<label=Perfect,fig=TRUE,include=FALSE, echo=FALSE>>=
+set.seed(2018) # setting the random number generator
+# set up data frame with known probabilities p and randomly chosen probabilities q in range [0,1]
+N <- 1000 # number of tournaments
+n <- 100 # number of questions per tournament
+total_score_perfect <- data.frame(result=rep(0, N))
+# defining the real probabilities for each question: 10 questions with prob=0.05; 10 with prob=0.15 and so on till prob=0.95
+tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0, event=0)
+# simulating N tournaments
+for (i in (1:N)) {
+  tour_run$q = tour_run$p # The perfect forecaster knows the true probabilities
+  for (j in (1:n)) {tour_run$event[j] <- rbinom(1,1,tour_run$p[j])} # the event happens or not
+  tour_run$question.score <- (tour_run$event - tour_run$q)^2
+  total_score_perfect$result[i] <- sum(tour_run$question.score)
+}
+perfect_score <- sum(tour_run$p*(1-tour_run$p))
+gem.result.perfect <- mean(total_score_perfect$result)
+ggplot(data=total_score_perfect, aes(x = result, y = ..density..)) +
+  geom_histogram(data=total_score_perfect, aes(x = result, y = ..density..), 
+                 binwidth=1, fill="lightblue", color="grey60", size=0.2) +
+  geom_density(data=total_score_perfect, aes(x = result, y = ..density..)) +
+  geom_vline(xintercept=perfect_score, color="red", size=0.8) +
+  xlim(0, 50) +
+  labs(title = paste("Distribution of total scores for", N, "runs"), 
+       subtitle = "Perfect Forecaster",
+       x = "total score", 
+       y = "density") +
+  JT.theme
+@
+
+\begin{figure}
+\centering
+\includegraphics[width=200pt, height=200pt]{Tour-Perfect}
+\caption{Perfect Forecaster}
+\label{fig:Perfect}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{figure}
+
+\subsection{The Ignorant Forecaster}
+
+The \emph{Ignorant Forecaster} has no insight at all in the matter and chooses for each question at random\sidenote{random uniform distribution within [0,1]} a probability $q_{i}$ in the range [0,1].
+
+Her average total score is given by Equation~\ref{eq:meantotal}:
 \begin{equation}
-S_{ignorant}=E(S_{ignorant}) + \epsilon = \sum_{i=1}^{i=n}p_{i}(1-p_{i}) + n\sigma_{ignorant}^2 + \epsilon
+\label{eq:ignorant}
+E(S_{ignorant})=\sum_{i=1}^{i=n}p_{i}(1-p_{i}) + \sum_{i=1}^{i=n}(q_{i}-p_{i})^{2} = \sum_{i=1}^{i=n}p_{i}(1-p_{i}) + n\sigma_{ignorant}^2
 \end{equation}
+
+Because the second term is always positive, the average total score of the Ignorant Forecaster will always be greater that the score of the Perfect Forecaster. You cannot do worse than this, so this score will be the \emph{maximum} value of the average score.
 
 <<label=Ignorant,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and randomly chosen probabilities q in range [0,1]
-N <- 1000 # number of runs
-n <- 100 # number of questions per run
-total_score <- data.frame(term1=rep(0,N), term2=0, result=0)
-tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0)
-# i is number of runs
+N <- 1000 # number of tournaments
+n <- 100 # number of questions per tournament
+total_score_ignorant <- data.frame(result=rep(0,N))
+# defining the real probabilities for each question: 10 questions with prob=0.05; 10 with prob=0.15 and so on till prob=0.95
+tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0, event=0)
+# simulating N tournaments
 for (i in (1:N)) {
-  tour_run$q = runif(n)
-  tour_run$question.score.term1 <- tour_run$p*(1-tour_run$p) 
-  tour_run$question.score.term2 <- (tour_run$q - tour_run$p)^2
-  tour_run$question.score <- tour_run$question.score.term1 + tour_run$question.score.term2
-  total_score$term1[i] <- sum(tour_run$question.score.term1)
-  total_score$term2[i] <- sum(tour_run$question.score.term2)
-  total_score$result[i] <- sum(tour_run$question.score)
+  tour_run$q = runif(n) # The ignorant forecaster just picks a value in the range [0,1]
+  for (j in (1:n)) {tour_run$event[j] <- rbinom(1,1,tour_run$p[j])} # the event happens or not
+  tour_run$question.score <- (tour_run$event - tour_run$q)^2
+  total_score_ignorant$result[i] <- sum(tour_run$question.score)
 }
-perfect_score <- sum(tour_run$p*(1-tour_run$p))
-perfect_score
-gem.term1 <- mean(total_score$term1)
-gem.term2 <- mean(total_score$term2)
-gem.result <- mean(total_score$result)
-ggplot(data=total_score, aes(x = result, y = ..density..)) +
-  geom_histogram(data=total_score, aes(x = result, y = ..density..), 
+gem.result.ignorant <- mean(total_score_ignorant$result)
+ggplot(data=total_score_ignorant, aes(x = result, y = ..density..)) +
+  geom_histogram(data=total_score_ignorant, aes(x = result, y = ..density..), 
                  binwidth=1, fill="lightblue", color="grey60", size=0.2) +
-  geom_density(data=total_score, aes(x = result, y = ..density..)) +
-  # geom_line(data=error_curve, aes(x = x, y = y), color="red") +
-  geom_vline(xintercept=perfect_score, color="red", size=0.8) +
+  geom_density(data=total_score_ignorant, aes(x = result, y = ..density..)) +
+  geom_density(data=total_score_perfect, aes(x = result, y = ..density..), color="red", linetype=2, size=0.5 ) +
+  geom_vline(xintercept=perfect_score, color="red", size=0.5) +
+  geom_vline(xintercept=gem.result.ignorant, color="blue", size=0.8) +
   annotate("text", x= perfect_score, y= 0.04, label="Perfect", color="red") +
   annotate("text", x= perfect_score, y= 0.03, label="Forecaster", color="red") +
-  annotate("text", x= gem.result, y= 0.04, label="Ignorant", color="blue") +
-  annotate("text", x= gem.result, y= 0.03, label="Forecaster", color="blue") +
-  geom_vline(xintercept=gem.result, color="blue", size=0.8) +
+  annotate("text", x= gem.result.ignorant, y= 0.16, label="Ignorant", color="blue") +
+  annotate("text", x= gem.result.ignorant, y= 0.15, label="Forecaster", color="blue") +
   xlim(0, 50) +
-  labs(title = paste("Distribution of Aldous scores for", N, "runs"), 
+  labs(title = paste("Distribution of total scores for", N, "runs"), 
        subtitle = "Ignorant Forecaster",
-       x = "Aldous Score", 
+       x = "total score", 
        y = "density") +
   JT.theme
 @
@@ -166,18 +319,18 @@ ggplot(data=total_score, aes(x = result, y = ..density..)) +
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{figure}
 
-The score of the \emph{Perfect Forecaster} is fixed once we defined the values of $p_{i}$. With the choices in this example the perfect score is $\Sexpr{round(perfect_score,2)}$.
+As we can see there is a very slight overlap between the range of scores of the \emph{Perfect Forecaster} and the \emph{Ignorant Forecaster}. Purely by chance in the materialisaton or not of the events, it could happen that the worst possible forecaster, beats the best one!
 
 \subsection{A Better Forecaster}
-A \emph{Better forecaster} is someone who does not make a random choice of the probability over the whole range [0,1] but, because he/she has information on the subject, will pick a value for $q_{i}$ that is closer to the real probability $p_{i}$. We simulate this by lettin him/her pick a value for $q_{i}$ randomly in the range $[p_{i}-\sigma,p_{i}+\sigma]$ where $\sigma^{2}$ is the RMS error:
+The \emph{Better forecaster} is someone who does not make a random choice of the probability over the whole range [0,1] but, because she has information on the subject, will pick a value for $q_{i}$ that is closer to the real probability $p_{i}$. We simulate this by letting her pick a value for $q_{i}$ randomly in the range $[p_{i}-\sigma,p_{i}+\sigma]$ where $\sigma^{2}$ is the RMS error:
 \begin{equation}
 \sigma^{2} = \frac{(q_{i}-p_{i})^2}{n}
 \end{equation}
 
 <<echo=FALSE>>=
-sigma.ignorant=sqrt(gem.term2/n)
+sigma <- sqrt((gem.result.ignorant - perfect_score)/n)
 @
-The range will thus be $[p_{i}-\Sexpr{round(sigma.ignorant,2)},p_{i}+\Sexpr{round(sigma.ignorant,2)}]$. \sidenote{When the lower limit is smaller than 0, it will be trimmed to 0. Conversely: an upper limit above 1 will be trimmed to 1}
+The value for $\sigma$ for the \emph{Ignorant Forecaster} is $\Sexpr{round(sigma,2)}$. The range of choice for the \emph{Better Forecaster} will thus be $[p_{i}-\Sexpr{round(sigma,2)},p_{i}+\Sexpr{round(sigma,2)}]$. \sidenote{When the lower limit is smaller than 0, it will be trimmed to 0. Conversely: an upper limit above 1 will be trimmed to 1}
 
 <<label=Better,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
@@ -185,39 +338,41 @@ set.seed(2018) # setting the random number generator
 # randomly chosen probabilities q in range [p-sigma,p+sigma]
 N <- 1000 # number of runs
 n <- 100 # number of questions per run
-total_score <- data.frame(term1=rep(0,N), term2=0, result=0)
+total_score_better <- data.frame(result=rep(0,N))
 tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0)
-sigma <- sigma.ignorant
-# i is number of runs
+sigma <- 0.41
+# i is number of tournaments
 for (i in (1:N)) {
+   # The better forecaster picks a value in the range [p-sigma,p+sigma]
   for (j in (1:n)) {
     tour_run$lower.limit[j] <- ifelse(tour_run$p[j] - sigma < 0, 0, tour_run$p[j] - sigma)
     tour_run$upper.limit[j] <- ifelse(tour_run$p[j] + sigma > 1, 1, tour_run$p[j] + sigma)
     tour_run$q[j] <- runif(1, tour_run$lower.limit[j], tour_run$upper.limit[j])
   }
-  tour_run$question.score.term1 <- tour_run$p*(1-tour_run$p) 
-  tour_run$question.score.term2 <- (tour_run$q - tour_run$p)^2
-  tour_run$question.score <- tour_run$question.score.term1 + tour_run$question.score.term2
-  total_score$term1[i] <- sum(tour_run$question.score.term1)
-  total_score$term2[i] <- sum(tour_run$question.score.term2)
-  total_score$result[i] <- sum(tour_run$question.score)
+  for (j in (1:n)) {tour_run$event[j] <- rbinom(1,1,tour_run$p[j])} # the event happens or not
+  tour_run$question.score <- (tour_run$event - tour_run$q)^2
+  total_score_better$result[i] <- sum(tour_run$question.score)
 }
-gem.term2 <- mean(total_score$term2)
-gem.result <- mean(total_score$result)
-ggplot(data=total_score, aes(x = result, y = ..density..)) +
-  geom_histogram(data=total_score, aes(x = result, y = ..density..), 
-                 binwidth=1, fill="lightblue", color="grey60", size=0.2) +
-  geom_density(data=total_score, aes(x = result, y = ..density..)) +
-  geom_vline(xintercept=perfect_score, color="red", size=0.8) +
-  annotate("text", x= perfect_score, y= 0.06, label="Perfect", color="red") +
-  annotate("text", x= perfect_score, y= 0.03, label="Forecaster", color="red") +
-  annotate("text", x= gem.result, y= 0.16, label="Better", color="blue") +
-  annotate("text", x= gem.result, y= 0.13, label="Forecaster", color="blue") +
-  geom_vline(xintercept=gem.result, color="blue", size=0.8) +
+gem.result.better <- mean(total_score_better$result)
+ggplot(data=total_score_better, aes(x = result, y = ..density..)) +
+  geom_histogram(data=total_score_better, aes(x = result, y = ..density..), 
+                 binwidth=1, fill="lightgreen", color="grey60", size=0.2) +
+  geom_density(data=total_score_better, aes(x = result, y = ..density..)) +
+  geom_density(data=total_score_perfect, aes(x = result, y = ..density..), color="red", linetype=2, size=0.5 ) +
+  geom_density(data=total_score_ignorant, aes(x = result, y = ..density..), color="blue", linetype=2, size=0.5 ) +
+  geom_vline(xintercept=perfect_score, color="red", size=0.5, linetype=2) +
+  annotate("text", x= perfect_score, y= 0.21, label="Perfect", color="red") +
+  annotate("text", x= perfect_score, y= 0.20, label="Forecaster", color="red") +
+  annotate("text", x= gem.result.better, y= 0.19, label="Better", color="black") +
+  annotate("text", x= gem.result.better, y= 0.18, label="Forecaster", color="black") +
+  annotate("text", x= gem.result.ignorant, y= 0.15, label="Ignorant", color="blue") +
+  annotate("text", x= gem.result.ignorant, y= 0.14, label="Forecaster", color="blue") +
+  geom_vline(xintercept=gem.result.ignorant, color="blue", size=0.5, linetype=2) +
+  geom_vline(xintercept=gem.result.better, color="green", size=0.5) +
   xlim(0, 50) +
-  labs(title = paste("Distribution of Aldous scores for", N, "runs"), 
+  labs(title = paste("Distribution of scores for", N, "runs"), 
        subtitle = "Better Forecaster",
-       x = "Aldous Score", 
+       x = "total score", 
        y = "density") +
   JT.theme
 @
@@ -230,23 +385,27 @@ ggplot(data=total_score, aes(x = result, y = ..density..)) +
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{figure}
 
-As we expected, the scores of the \emph{Better Forecaster} are lower. It should be noted that the spread of the scores around the average score of the \emph{Better Forecaster} is smaller than the spread around the average score of the \emph{Ignorant Forecaster} in Figure~\ref{fig:Ignorant}
+As we expected, the scores of the \emph{Better Forecaster} are lower. There is considerable overlap between the three forecasters. The better forecaster does not always win each individual tournament.
 
 \section{Comparing two contestants}
-When a forecaster gets closer to the perfect score, he/she is considered to be improving. When comparing two contestants, we could look at there average score over many runs: the Contestant with the lowest average score is the better one. However, when we look at only one run, it could be that the Contestant with the higher average score still performs better than the Contestant with the lower average score. This is of course due to the spread of the scores \emph{around} the average value. By luck, Contestant 2 could be to the left of his/her average, while Contestant 1 could be to the right of his/her average. And it could happen that the score of Contestant 2 is better than the score of Contestant 1. This seems in accordance with our intuition: the better player wins most of the time, but not always. As the difference of ability increases, the probability for a win for the better player increases.
+When comparing two contestants, we could look at their \emph{average total score} over many tournaments: the Contestant with the lowest average score is the better one. However, when we look at only one tournament, it could be that the (worse) Contestant with the higher average score still performs better than the (better) Contestant with the lower average score. This is of course due to the spread of the scores \emph{around} the average value. By luck, Contestant 2 could be to the left of her average, while Contestant 1 could be to the right of her average. This seems in accordance with our intuition: in a game where both skill and chance play a role, the better player wins most of the time, but not always. As the difference of ability increases, the probability for a win for the better player increases.
 
-<<label=Compare,fig=TRUE,include=FALSE, echo=FALSE>>=
+<<echo=FALSE>>=
 set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and 
 # randomly chosen probabilities q in range [p-sigma,p+sigma]
 N <- 100 # number of runs
 n <- 100 # number of questions per run
-total_score <- data.frame(Contestant1=rep(0,N), Contestant2=0)
-tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0)
+total_score_contest <- data.frame(Contestant1=rep(0,N), Contestant2=0)
+tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), 
+                       q1 = 0, q2=0,
+                       lower.limitC1=0, upper.limitC1=0, 
+                       lower.limitC2=0, upper.limitC2=0,
+                       event=0)
 winC1 <- 0
 winC2 <- 0
-sigma_C1 <- 0.1
-sigma_C2 <- 0.15
+sigma_C1 <- 0
+sigma_C2 <- 0.2
 for (i in (1:N)) {
   for (j in (1:n)) {
     tour_run$lower.limitC1[j] <- ifelse(tour_run$p[j] - sigma_C1 < 0, 0, tour_run$p[j] - sigma_C1)
@@ -256,18 +415,16 @@ for (i in (1:N)) {
     tour_run$upper.limitC2[j] <- ifelse(tour_run$p[j] + sigma_C2 > 1, 1, tour_run$p[j] + sigma_C2)
     tour_run$q2[j] <- runif(1, tour_run$lower.limitC2[j], tour_run$upper.limitC2[j])
   }
-  tour_run$question.score.term1 <- tour_run$p*(1-tour_run$p) 
-  tour_run$question.score.term2.C1 <- (tour_run$q1 - tour_run$p)^2
-  tour_run$question.score.term2.C2 <- (tour_run$q2 - tour_run$p)^2
-  tour_run$question.score.C1 <- tour_run$question.score.term1 + tour_run$question.score.term2.C1
-  tour_run$question.score.C2 <- tour_run$question.score.term1 + tour_run$question.score.term2.C2
-  total_score$Contestant1[i] <- sum(tour_run$question.score.C1)
-  total_score$Contestant2[i] <- sum(tour_run$question.score.C2)
-  if(total_score$Contestant1[i] == total_score$Contestant2[i]) {
+  for (j in (1:n)) {tour_run$event[j] <- rbinom(1,1,tour_run$p[j])} # the event happens or not
+  tour_run$question.score.C1 <- (tour_run$event - tour_run$q1)^2
+  tour_run$question.score.C2 <- (tour_run$event - tour_run$q2)^2
+  total_score_contest$Contestant1[i] <- sum(tour_run$question.score.C1)
+  total_score_contest$Contestant2[i] <- sum(tour_run$question.score.C2)
+  if(total_score_contest$Contestant1[i] == total_score_contest$Contestant2[i]) {
     winC1 <- winC1 + 0.5
     winC2 <- winC2 + 0.5
   }
-  ifelse(total_score$Contestant1[i] < total_score$Contestant2[i], winC1 <- winC1+1, winC2 <- winC2+1)
+  ifelse(total_score_contest$Contestant1[i] < total_score_contest$Contestant2[i], winC1 <- winC1+1, winC2 <- winC2+1)
 }
 winC1
 winC2
