@@ -61,7 +61,6 @@
 <<echo=FALSE>>=
 library(tidyverse)
 library(gridExtra)
-library(xtable)
 @
 
 % Setting the ggplot theme:
@@ -149,7 +148,7 @@ score_{i}=(result_{i} - q_{i})^2
 
 \medskip
 
-\newthought{It is very important to realise} that if we run a second tournament with 10 questions with the same probabilities $p_{i}$, and the forecaster would give exactly the same answers for the probabilities $q_{i}$, the total score could be different! This is because of the intermediate step where at the expiry date the event changes from a \emph{probability} into a \emph{reality}: it happens or it does not happen. An event with probability 30\% could ''not happen" in the first tournament, but materialise in the second tournament. So it could be that in tournament 2 we get the following results (note the change in the result for questions 2 and 8):
+\newthought{It is very important to realise} that if we run a second tournament with 10 questions with the same probabilities $p_{i}$, and the forecaster would give exactly the same answers for the probabilities $q_{i}$, the total score could be different! This is because of the intermediate step where at the expiry date the event changes from a \emph{probability} $p_{i}$ into a \emph{reality} $result_{i}$: it happens or it does not happen. An event with probability 30\% could for example ''not happen" in the first tournament, but ''happens" in the second tournament. So it could be that in tournament 2 we get the following results (note the change in the result for questions 2 and 8):
 
 \medskip
 
@@ -177,7 +176,7 @@ score_{i}=(result_{i} - q_{i})^2
 
 \medskip
 
-The same forecaster, giving the same predictions based on her knowledge about questions with the same probabilities, will get a different score because there is an uncontrollable factor ''chance" that makes the event happen on one occasion but not on the other. From this it follows that if we run 1000 tournaments with 100 questions with the same actual probabilities, and the forecaster gives the same estimate for the probability that the event will occur, we will get 1000 slightly different total scores. In short: the total score will show some variation around an average value of the total score.
+The same forecaster, giving the same predictions based on her knowledge about questions with the same probabilities, will get a different score because there is an uncontrollable factor ''chance" that makes the event happen on one occasion but not on the other. From this it follows that if we run 1000 tournaments with 100 questions with the same actual probabilities ($p_{i}$), and the forecaster gives the same estimate ($q_{i}$) for the probability that the event will occur, we will get 1000 slightly different total scores. In short: the total score will show some variation around an average value of the total score.
 
 \section{Expected value of the score}
 
@@ -228,7 +227,7 @@ E(S_{perfect})=\sum_{i=1}^{i=n}p_{i}(1-p_{i})
 The score of the \emph{Perfect Forecaster} is fixed once we defined the values of $p_{i}$. With the choices in this example the perfect score is $16.75$.
 
 <<>>=
-Aldous <- TRUE
+Aldous <- FALSE
 @
 
 <<label=Perfect,fig=TRUE,include=FALSE, echo=FALSE>>=
@@ -242,7 +241,7 @@ tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0, event=0)
 # simulating N tournaments
 for (i in (1:N)) {
   tour_run$q = tour_run$p # The perfect forecaster knows the true probabilities
-  for (j in (1:n)) {tour_run$event[j] <- rbinom(1,1,tour_run$p[j])} # the event happens or not
+  tour_run$event <- rbinom(n,1,tour_run$p)
   tour_run$question.score <- (tour_run$event - tour_run$q)^2
   total_score_perfect$result[i] <- sum(tour_run$question.score)
 }
@@ -292,7 +291,6 @@ tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0, event=0)
 # simulating N tournaments
 for (i in (1:N)) {
   tour_run$q = runif(n) # The ignorant forecaster just picks a value in the range [0,1]
-#  for (j in (1:n)) {tour_run$event[j] <- rbinom(1,1,tour_run$p[j])} # the event happens or not
   tour_run$event <- rbinom(n,1,tour_run$p)
   tour_run$question.score <- (tour_run$event - tour_run$q)^2
   total_score_ignorant$result[i] <- sum(tour_run$question.score)
@@ -325,7 +323,7 @@ ggplot(data=total_score_ignorant, aes(x = result, y = ..density..)) +
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{figure}
 
-As we can see there is a very slight overlap between the range of scores of the \emph{Perfect Forecaster} and the \emph{Ignorant Forecaster}. Purely by chance in the materialisaton or not of the events, it could happen that the worst possible forecaster, beats the best one!
+As we can see there is a very slight overlap between the range of scores of the \emph{Perfect Forecaster} and the \emph{Ignorant Forecaster}. Purely by chance when the event goes from a probility ($p_{i}$) to a reality ($result_{i}$), it could happen that the worst possible forecaster, beats the best one!
 
 \subsection{A Better Forecaster}
 The \emph{Better forecaster} is someone who does not make a random choice of the probability over the whole range [0,1] but, because she has information on the subject, will pick a value for $q_{i}$ that is closer to the real probability $p_{i}$. We simulate this by letting her pick a value for $q_{i}$ randomly in the range $[p_{i}-\sigma,p_{i}+\sigma]$ where $\sigma^{2}$ is the RMS error:
@@ -343,21 +341,24 @@ set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and 
 # randomly chosen probabilities q in range [p-sigma,p+sigma]
 N <- 1000 # number of runs
-n <- 100 # number of questions per run
+n <- 10 # number of questions per run
 total_score_better <- data.frame(result=rep(0,N))
 tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0)
-sigma <- 0.41
+sigma <- 0.2
 # i is number of tournaments
 for (i in (1:N)) {
-   # The better forecaster picks a value in the range [p-sigma,p+sigma]
-  tour_run$lower.limit <- ifelse(tour_run$p - sigma < 0, 0, tour_run$p + sigma)
+  tour_run$lower.limit <- ifelse(tour_run$p - sigma < 0, 0, tour_run$p - sigma)
   tour_run$upper.limit <- ifelse(tour_run$p + sigma > 1, 1, tour_run$p + sigma)
-  for (j in (1:n)) {
-    ifelse(Aldous==TRUE, 
-           tour_run$q[j] <- sample(c(tour_run$lower.limit[j], tour_run$upper.limit[j]),1) ,
-           tour_run$q[j] <- runif(1, tour_run$lower.limit[j], tour_run$upper.limit[j]))
-  }
-#  for (j in (1:n)) {tour_run$event[j] <- rbinom(1,1,tour_run$p[j])} # the event happens or not
+# The better forecaster picks either [p-sigma] (50% chance) or [p+sigma] (50% chance) - (David J. Aldous)
+# or
+# picks a value in the range [p-sigma,p+sigma] - (J. Trommelmans)
+#
+# Switch between these two options by setting the variable Aldous to TRUE or FALSE
+  ifelse(Aldous==TRUE, 
+        tour_run$q <- ifelse(runif(n,tour_run$lower.limit,tour_run$upper.limit)<(tour_run$lower.limit+tour_run$upper.limit)/2, 
+                              tour_run$lower.limit, 
+                              tour_run$upper.limit),
+        tour_run$q <- runif(n, tour_run$lower.limit, tour_run$upper.limit))
   tour_run$event <- rbinom(n,1,tour_run$p)
   tour_run$question.score <- (tour_run$event - tour_run$q)^2
   total_score_better$result[i] <- sum(tour_run$question.score)
@@ -403,7 +404,7 @@ When comparing two contestants, we could look at their \emph{average total score
 set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and 
 # randomly chosen probabilities q in range [p-sigma,p+sigma]
-N <- 1000 # number of runs
+N <- 1000 # number of tournaments
 n <- 100 # number of questions per run
 percentage_win_C1 <- data.frame(matrix(0, ncol = 7, nrow = 7))
 colnames(percentage_win_C1) <- as.character(seq(0, 0.3, by=0.05))
@@ -421,19 +422,21 @@ winC2 <- 0
 sigma_C1 <- (p1-1)*0.05
 sigma_C2 <- (p2-1)*0.05
 for (i in (1:N)) {
-  for (j in (1:n)) {
-    tour_run$lower.limitC1[j] <- ifelse(tour_run$p[j] - sigma_C1 < 0, 0, tour_run$p[j] - sigma_C1)
-    tour_run$upper.limitC1[j] <- ifelse(tour_run$p[j] + sigma_C1 > 1, 1, tour_run$p[j] + sigma_C1)
-    ifelse(Aldous==TRUE, 
-           tour_run$q1[j] <- sample(c(tour_run$lower.limitC1[j], tour_run$upper.limitC1[j]),1) ,
-           tour_run$q1[j] <- runif(1, tour_run$lower.limitC1[j], tour_run$upper.limitC1[j]))
-    tour_run$lower.limitC2[j] <- ifelse(tour_run$p[j] - sigma_C2 < 0, 0, tour_run$p[j] - sigma_C2)
-    tour_run$upper.limitC2[j] <- ifelse(tour_run$p[j] + sigma_C2 > 1, 1, tour_run$p[j] + sigma_C2)
-    ifelse(Aldous==TRUE, 
-           tour_run$q2[j] <- sample(c(tour_run$lower.limitC2[j], tour_run$upper.limitC2[j]),1) ,
-           tour_run$q2[j] <- runif(1, tour_run$lower.limitC2[j], tour_run$upper.limitC2[j]))
-  }
-  for (j in (1:n)) {tour_run$event[j] <- rbinom(1,1,tour_run$p[j])} # the event happens or not
+  tour_run$lower.limitC1 <- ifelse(tour_run$p - sigma_C1 < 0, 0, tour_run$p - sigma_C1)
+  tour_run$upper.limitC1 <- ifelse(tour_run$p + sigma_C1 > 1, 1, tour_run$p + sigma_C1)
+  tour_run$lower.limitC2 <- ifelse(tour_run$p - sigma_C2 < 0, 0, tour_run$p - sigma_C2)
+  tour_run$upper.limitC2 <- ifelse(tour_run$p + sigma_C2 > 1, 1, tour_run$p + sigma_C2)
+  ifelse(Aldous==TRUE, 
+        tour_run$q1 <- ifelse(runif(n,tour_run$lower.limitC1,tour_run$upper.limitC1)<(tour_run$lower.limitC1+tour_run$upper.limitC1)/2, 
+                              tour_run$lower.limitC1, 
+                              tour_run$upper.limitC1),
+        tour_run$q1 <- runif(n, tour_run$lower.limitC1, tour_run$upper.limitC1))
+  ifelse(Aldous==TRUE, 
+        tour_run$q2 <- ifelse(runif(n,tour_run$lower.limitC2,tour_run$upper.limitC2)<(tour_run$lower.limitC2+tour_run$upper.limitC2)/2, 
+                              tour_run$lower.limitC2, 
+                              tour_run$upper.limitC2),
+        tour_run$q2 <- runif(n, tour_run$lower.limitC2, tour_run$upper.limitC2))
+  tour_run$event <- rbinom(n,1,tour_run$p)
   tour_run$question.score.C1 <- (tour_run$event - tour_run$q1)^2
   tour_run$question.score.C2 <- (tour_run$event - tour_run$q2)^2
   total_score_contest$Contestant1[i] <- sum(tour_run$question.score.C1)
