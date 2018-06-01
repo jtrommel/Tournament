@@ -227,14 +227,14 @@ E(S_{perfect})=\sum_{i=1}^{i=n}p_{i}(1-p_{i})
 The score of the \emph{Perfect Forecaster} is fixed once we defined the values of $p_{i}$. With the choices in this example the perfect score is $16.75$.
 
 <<>>=
-Aldous <- FALSE
+Aldous <- TRUE
+N <- 1000 # number of tournaments
+n <- 100 # number of questions per tournament
 @
 
 <<label=Perfect,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and randomly chosen probabilities q in range [0,1]
-N <- 1000 # number of tournaments
-n <- 100 # number of questions per tournament
 total_score_perfect <- data.frame(result=rep(0, N))
 # defining the real probabilities for each question: 10 questions with prob=0.05; 10 with prob=0.15 and so on till prob=0.95
 tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0, event=0)
@@ -283,8 +283,6 @@ Because the second term is always positive, the average total score of the Ignor
 <<label=Ignorant,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and randomly chosen probabilities q in range [0,1]
-N <- 1000 # number of tournaments
-n <- 100 # number of questions per tournament
 total_score_ignorant <- data.frame(result=rep(0,N))
 # defining the real probabilities for each question: 10 questions with prob=0.05; 10 with prob=0.15 and so on till prob=0.95
 tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0, event=0)
@@ -332,19 +330,17 @@ The \emph{Better forecaster} is someone who does not make a random choice of the
 \end{equation}
 
 <<echo=FALSE>>=
-sigma <- sqrt((gem.result.ignorant - perfect_score)/n)
+sigma.ignorant <- sqrt((gem.result.ignorant - perfect_score)/n)
 @
-The value for $\sigma$ for the \emph{Ignorant Forecaster} is $\Sexpr{round(sigma,2)}$. The range of choice for the \emph{Better Forecaster} will thus be $[p_{i}-\Sexpr{round(sigma,2)},p_{i}+\Sexpr{round(sigma,2)}]$. \sidenote{When the lower limit is smaller than 0, it will be trimmed to 0. Conversely: an upper limit above 1 will be trimmed to 1}
+The value for $\sigma$ for the \emph{Ignorant Forecaster} is $\Sexpr{round(sigma.ignorant,2)}$. The range of choice for the \emph{Better Forecaster} will thus be $[p_{i}-\Sexpr{round(sigma.ignorant,2)},p_{i}+\Sexpr{round(sigma.ignorant,2)}]$. \sidenote{When the lower limit is smaller than 0, it will be trimmed to 0. Conversely: an upper limit above 1 will be trimmed to 1}
 
 <<label=Better,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and 
 # randomly chosen probabilities q in range [p-sigma,p+sigma]
-N <- 1000 # number of runs
-n <- 10 # number of questions per run
 total_score_better <- data.frame(result=rep(0,N))
 tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0)
-sigma <- 0.2
+sigma <- sigma.ignorant
 # i is number of tournaments
 for (i in (1:N)) {
   tour_run$lower.limit <- ifelse(tour_run$p - sigma < 0, 0, tour_run$p - sigma)
@@ -404,7 +400,7 @@ When comparing two contestants, we could look at their \emph{average total score
 set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and 
 # randomly chosen probabilities q in range [p-sigma,p+sigma]
-N <- 1000 # number of tournaments
+N <- 500 # number of tournaments
 n <- 100 # number of questions per run
 percentage_win_C1 <- data.frame(matrix(0, ncol = 7, nrow = 7))
 colnames(percentage_win_C1) <- as.character(seq(0, 0.3, by=0.05))
@@ -456,6 +452,42 @@ percentage_win_C1[p1,p2] <- winC1/N
 percentage_win_C1  
 @
 
+<<echo=FALSE>>=
+set.seed(2018) # setting the random number generator
+# set up data frame with known probabilities p and 
+# randomly chosen probabilities q in range [p-sigma,p+sigma]
+N <- 500 # number of tournaments
+nC <- 2 # number of contestants
+n <- 100 # number of questions per run
+sigma.min <- 0
+sigma.max <- 0.2
+tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
+                   contestant = rep(rep(seq(1:nC), each=n), N),
+                   question = rep(seq(1:n), N*nC),
+                   p = rep(seq(0.05, 0.95, by=0.1), N*nC*n/10))
+tour$sigma <- sigma.min + (sigma.max - sigma.min)*(tour$contestant - 1)/(nC - 1)
+tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
+tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
+ifelse(Aldous==TRUE, 
+        tour$q <- ifelse(runif(n*nC*N,tour$lower.limit,tour$upper.limit)<(tour$lower.limit+tour$upper.limit)/2, 
+                              tour$lower.limit, 
+                              tour$upper.limit),
+        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
+tour$event <- rbinom(n*nC*N,1,tour$p)
+tour$question.score <- (tour$event - tour$q)^2
+tour %>% 
+  group_by(tournament, contestant, sigma) %>% 
+  summarise(score=sum(question.score)) -> tournament.table
+tournament.table <- tournament.table[order(tournament.table$tournament, tournament.table$score),]
+tournament.table$win <- rep(c(1,rep(0,nC-1)),N)
+tournament.table %>% group_by(contestant, sigma) %>% summarise(som=sum(win)) -> endscore
+endscore$percentage <- endscore$som/N
+endscore
+@
+
+<<>>=
+endscore 
+@
 
 \newpage
 \textbf{Thanks} \\
