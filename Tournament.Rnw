@@ -51,7 +51,7 @@
 \usepackage{makeidx}
 \makeindex
 
-\title{Notes on the "Prediction Tournament Paradox" (prof. David J. Aldous)}
+\title{Notes on " A Prediction Tournament Paradox" (prof. David J. Aldous)}
 \author{Jan Trommelmans}
 
 \begin{document}
@@ -84,8 +84,15 @@ JT.theme <- theme(panel.border = element_rect(fill = NA, colour = "gray10"),
 % Functions
 
 \frontmatter
-\chapter*{Notes on "Prediction Tournament Paradox"}
+\chapter*{Notes on "A Prediction Tournament Paradox - David J. Aldous"}
 \chaptermark*{Jan Trommelmans}
+
+\chapter*{Introduction}
+In his paper "A Prediction Tournament Paradox", David J. Aldous\footnote{A Prediction Tournament Paradox, David J. Aldous, Department of Statistics, U.C. Berkeley CA 94720-3860, May 26, 2018} shows that in a contest with many tournaments, each dealing with 100 questions, the most accurate forecasters do not necessarily score the highest number of wins when the number of forecasters is large.
+
+These notes try to explain the scoring methods that prof. Aldous uses, how the simulations are done and how to interpret the figures and tables in his paper. His simulations are reconstructed using the programming language R. Some extra figures are included in the hope of clarifiying the different steps in the paper. At the end an alternative model is proposed.
+
+From these notes I tend to conclude that the paradox is the result of the special position that is taken by what is called the \emph{Perfect Forecaster}. Once we recognise that in reality this forecaster does not exist, and therefore should not be included in our simulations, the paradox as such disappears. However, the paper convincingly shows that, although the better forecasters will win, they do so much less frequently than our intuition suggests. The main cause for this is the fact that the chance that determines the outcome of each question (a Bernouilli proces), dominates the scene and substantially reduces the effect of the ability of the players. Luck and skill are combined, and luck is powerful in these kinds of situations.
 
 \mainmatter
 \chapter{Scores}
@@ -230,7 +237,7 @@ The average score of the \emph{Perfect Forecaster} is fixed once we defined the 
 
 <<echo=FALSE>>=
 Aldous <- TRUE
-N <- 2000 # number of tournaments
+N <- 1000 # number of tournaments
 n <- 100 # number of questions per tournament
 prob.event <- seq(0.05, 0.95, by=0.1) # sequence of true probabilities
 @
@@ -346,11 +353,13 @@ for (i in (1:N)) {
 # picks a value in the range [p-sigma,p+sigma] - (J. Trommelmans)
 #
 # Switch between these two options by setting the variable Aldous to TRUE or FALSE
-  ifelse(Aldous==TRUE, 
+  if(Aldous==TRUE) { 
         tour_run$q <- ifelse(runif(n,tour_run$lower.limit,tour_run$upper.limit)<(tour_run$lower.limit+tour_run$upper.limit)/2, 
                               tour_run$lower.limit, 
-                              tour_run$upper.limit),
-        tour_run$q <- runif(n, tour_run$lower.limit, tour_run$upper.limit))
+                              tour_run$upper.limit)
+  } else {
+        tour_run$q <- runif(n, tour_run$lower.limit, tour_run$upper.limit)
+}
   tour_run$event <- rbinom(n,1,tour_run$p)
   tour_run$question.score <- (tour_run$event - tour_run$q)^2
   total_score_better$result[i] <- sum(tour_run$question.score)
@@ -407,11 +416,13 @@ tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
 tour$sigma <-sigma.range[tour$contestant]
 tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
 tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
-ifelse(Aldous==TRUE, 
+if(Aldous==TRUE) { 
         tour$q <- ifelse(runif(n*nC*N,tour$lower.limit,tour$upper.limit)<(tour$lower.limit+tour$upper.limit)/2, 
                               tour$lower.limit, 
-                              tour$upper.limit),
-        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
+                              tour$upper.limit)
+} else {
+        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit)
+}
 for (i in (1:N)) {
  tour$event[((i-1)*n*nC+ 1):(i*n*nC)] <- rep(rbinom(n,1,prob.event),nC)
 }
@@ -484,16 +495,20 @@ for (i in (1:N)) {
   tour_run$upper.limitC1 <- ifelse(tour_run$p + sigma_C1 > 1, 1, tour_run$p + sigma_C1)
   tour_run$lower.limitC2 <- ifelse(tour_run$p - sigma_C2 < 0, 0, tour_run$p - sigma_C2)
   tour_run$upper.limitC2 <- ifelse(tour_run$p + sigma_C2 > 1, 1, tour_run$p + sigma_C2)
-  ifelse(Aldous==TRUE, 
+  if(Aldous==TRUE) { 
         tour_run$q1 <- ifelse(runif(n,tour_run$lower.limitC1,tour_run$upper.limitC1)<(tour_run$lower.limitC1+tour_run$upper.limitC1)/2, 
                               tour_run$lower.limitC1, 
-                              tour_run$upper.limitC1),
-        tour_run$q1 <- runif(n, tour_run$lower.limitC1, tour_run$upper.limitC1))
-  ifelse(Aldous==TRUE, 
+                              tour_run$upper.limitC1)
+  } else {
+        tour_run$q1 <- runif(n, tour_run$lower.limitC1, tour_run$upper.limitC1)
+}
+  if(Aldous==TRUE) { 
         tour_run$q2 <- ifelse(runif(n,tour_run$lower.limitC2,tour_run$upper.limitC2)<(tour_run$lower.limitC2+tour_run$upper.limitC2)/2, 
                               tour_run$lower.limitC2, 
-                              tour_run$upper.limitC2),
-        tour_run$q2 <- runif(n, tour_run$lower.limitC2, tour_run$upper.limitC2))
+                              tour_run$upper.limitC2)
+  } else {
+        tour_run$q2 <- runif(n, tour_run$lower.limitC2, tour_run$upper.limitC2)
+}
   tour_run$event <- rbinom(n,1,tour_run$p)
   tour_run$question.score.C1 <- (tour_run$event - tour_run$q1)^2
   tour_run$question.score.C2 <- (tour_run$event - tour_run$q2)^2
@@ -537,11 +552,13 @@ tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
 tour$sigma <- sigma.min + (sigma.max - sigma.min)*(tour$contestant - 1)/(nC - 1)
 tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
 tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
-ifelse(Aldous==TRUE, 
+if(Aldous==TRUE) { 
         tour$q <- ifelse(runif(n*nC*N,tour$lower.limit,tour$upper.limit)<(tour$lower.limit+tour$upper.limit)/2, 
                               tour$lower.limit, 
-                              tour$upper.limit),
-        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
+                              tour$upper.limit)
+} else {
+        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit)
+}
 for (i in (1:N)) {
  tour$event[((i-1)*n*nC+ 1):(i*n*nC)] <- rep(rbinom(n,1,prob.event),nC)
 }
@@ -590,11 +607,13 @@ tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
 tour$sigma <- sigma.min + (sigma.max - sigma.min)*(tour$contestant - 1)/(nC - 1)
 tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
 tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
-ifelse(Aldous==TRUE, 
+if(Aldous==TRUE) { 
         tour$q <- ifelse(runif(n*nC*N,tour$lower.limit,tour$upper.limit)<(tour$lower.limit+tour$upper.limit)/2, 
                               tour$lower.limit, 
-                              tour$upper.limit),
-        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
+                              tour$upper.limit)
+} else {
+        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit)
+}
 for (i in (1:N)) {
  tour$event[((i-1)*n*nC+ 1):(i*n*nC)] <- rep(rbinom(n,1,prob.event),nC)
 }
@@ -644,11 +663,13 @@ tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
 tour$sigma <- sigma.min + (sigma.max - sigma.min)*(tour$contestant - 1)/(nC - 1)
 tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
 tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
-ifelse(Aldous==TRUE, 
+if(Aldous==TRUE) { 
         tour$q <- ifelse(runif(n*nC*N,tour$lower.limit,tour$upper.limit)<(tour$lower.limit+tour$upper.limit)/2, 
                               tour$lower.limit, 
-                              tour$upper.limit),
-        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
+                              tour$upper.limit)
+} else {
+        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit)
+}
 for (i in (1:N)) {
  tour$event[((i-1)*n*nC+ 1):(i*n*nC)] <- rep(rbinom(n,1,prob.event),nC)
 }
@@ -701,11 +722,13 @@ tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
 tour$sigma <- sigma.min + (sigma.max - sigma.min)*(tour$contestant - 1)/(nC - 1)
 tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
 tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
-ifelse(Aldous==TRUE, 
+if(Aldous==TRUE) { 
         tour$q <- ifelse(runif(n*nC*N,tour$lower.limit,tour$upper.limit)<(tour$lower.limit+tour$upper.limit)/2, 
                               tour$lower.limit, 
-                              tour$upper.limit),
-        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
+                              tour$upper.limit)
+} else {
+        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit)
+}
 for (i in (1:N)) {
  tour$event[((i-1)*n*nC+ 1):(i*n*nC)] <- rep(rbinom(n,1,prob.event),nC)
 }
@@ -734,10 +757,10 @@ ggplot(data=endscore, aes(x=contestant, y=som)) +
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{marginfigure}
 
-\chapter{Another forecaster model}
+\chapter{Another model for the forecaster}
 
 \section{Distribution of the total scores for different contestants}
-If we take a more gentle model for the \emph{Better Forecaster}, and allow her to pick a random number in the range $[p_{i}-\sigma,p_{i}+\sigma]$ the total scores of the realistic forecaster get better (Figure~\ref{fig:FiveTRJ}) compared with Figure~\ref{fig:FiveContestants}.
+A more gentle model for the \emph{Better Forecaster} is one that allows her to pick a random number in the range $[p_{i}-\sigma,p_{i}+\sigma]$ instead of having to pick either $(p_{i}-\sigma)$ or $(p_{i}+\sigma)$. In (Figure~\ref{fig:FiveTRJ}) we can see that the total scores of these forecasters, with different abilities (different values of $\sigma$) are better  than those in Figure~\ref{fig:FiveContestans}. This also means that the overlap between contestants increases and worse contestants are more likely to win.
 
 <<echo=FALSE>>=
 Aldous=FALSE #Pick model TRJ
@@ -757,11 +780,13 @@ tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
 tour$sigma <-sigma.range[tour$contestant]
 tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
 tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
-ifelse(Aldous==TRUE, 
+if(Aldous==TRUE) { 
         tour$q <- ifelse(runif(n*nC*N,tour$lower.limit,tour$upper.limit)<(tour$lower.limit+tour$upper.limit)/2, 
                               tour$lower.limit, 
-                              tour$upper.limit),
-        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
+                              tour$upper.limit)
+} else {
+        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit)
+}
 for (i in (1:N)) {
  tour$event[((i-1)*n*nC+ 1):(i*n*nC)] <- rep(rbinom(n,1,prob.event),nC)
 }
@@ -806,6 +831,8 @@ ggplot() +
 
 \section{Tournaments with 50 competitors}
 \subsection{Groups with Perfect Forecasters}
+As there is more overlap in this model, we expect that the situation for very good forecasters (close to the \emph{Perfect Forecaster}) will be even worse. And this is the case (Figure~\ref{fig:fiftyTRJ}). Tournemant wins go more and more to average players.
+
 % 50 contestants
 <<label=fiftyTRJ,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
@@ -822,11 +849,13 @@ tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
 tour$sigma <- sigma.min + (sigma.max - sigma.min)*(tour$contestant - 1)/(nC - 1)
 tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
 tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
-ifelse(Aldous==TRUE, 
+if(Aldous==TRUE) { 
         tour$q <- ifelse(runif(n*nC*N,tour$lower.limit,tour$upper.limit)<(tour$lower.limit+tour$upper.limit)/2, 
                               tour$lower.limit, 
-                              tour$upper.limit),
-        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
+                              tour$upper.limit)
+} else {
+        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit)
+}
 for (i in (1:N)) {
  tour$event[((i-1)*n*nC+ 1):(i*n*nC)] <- rep(rbinom(n,1,prob.event),nC)
 }
@@ -855,8 +884,9 @@ ggplot(data=endscore, aes(x=contestant, y=som)) +
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{marginfigure}
 
+\newpage
 \subsection{Groups without Perfect Forecasters}
-
+However: eliminating the \emph{Perfect Forecasters} and working only with \emph{Flawed Forecasters} gets us back on track.
 % 50 flawed contestants
 <<label=fiftyflawedTRJ,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
@@ -869,15 +899,18 @@ tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
                    contestant = rep(rep(seq(1:nC), each=n), N),
                    question = rep(seq(1:n), N*nC),
                    p = rep(prob.event, N*nC*n/10),
-                   event = 0)
+                   event = 0,
+                   q = 0)
 tour$sigma <- sigma.min + (sigma.max - sigma.min)*(tour$contestant - 1)/(nC - 1)
 tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
 tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
-ifelse(Aldous==TRUE, 
+if(Aldous==TRUE) { 
         tour$q <- ifelse(runif(n*nC*N,tour$lower.limit,tour$upper.limit)<(tour$lower.limit+tour$upper.limit)/2, 
                               tour$lower.limit, 
-                              tour$upper.limit),
-        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
+                              tour$upper.limit)
+} else {
+        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit)
+}
 for (i in (1:N)) {
  tour$event[((i-1)*n*nC+ 1):(i*n*nC)] <- rep(rbinom(n,1,prob.event),nC)
 }
