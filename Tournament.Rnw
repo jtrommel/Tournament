@@ -51,7 +51,7 @@
 \usepackage{makeidx}
 \makeindex
 
-\title{Notes on the ''Prediction Tournament Paradox"}
+\title{Notes on the "Prediction Tournament Paradox" (prof. David J. Aldous)}
 \author{Jan Trommelmans}
 
 \begin{document}
@@ -84,14 +84,16 @@ JT.theme <- theme(panel.border = element_rect(fill = NA, colour = "gray10"),
 % Functions
 
 \frontmatter
-\chapter*{Notes on ''Prediction Tournament Paradox"}
+\chapter*{Notes on "Prediction Tournament Paradox"}
+\chaptermark*{Jan Trommelmans}
 
 \mainmatter
 \chapter{Scores}
 
 \section{Forecasting and calculating the score}
 
-A \emph{tournament} consists of a number of questions. To keep things uncluttered I start with 10 questions. All these questions have an, unknown, probability $p_{i} \quad i=1 \ldots 10$ that they will actually happen before or on a specific date. Let's assume that some questions deal with events that are very unlikely (low $p_{i}$), some are a toss up, and some are highly likely (high $p_{i}$). A forecaster\sidenote{To avoid to write every time ''he/she", from now on I will assume the forecaster to be female} proposes for each question a probability $q_{i} \quad i=1 \ldots 10$ that the event will occur. The choices she makes depend of course on the knowledge she has on the subject matter of the question in case. The situation before the expiry date looks something like this\sidenote{I've ordered the questions from very unlikely to very likely}:
+\subsection{Probabilities of events and choices by the forecaster}
+A \emph{tournament} consists of a number of questions. To keep things uncluttered let us start with 10 questions. All these questions have an, unknown, probability $p_{i} \quad i=1 \ldots 10$ that they will actually happen before or on a specific date. Let's assume that some questions deal with events that are very unlikely (low $p_{i}$), some are a toss up, and some are highly likely (high $p_{i}$). A forecaster\sidenote{To avoid to write every time ''he/she", from now on I will assume the forecaster to be female} proposes for each question a probability $q_{i} \quad i=1 \ldots 10$ that the event will occur. The choices she makes depend of course on the knowledge she has on the subject matter of the question in case. The situation before the expiry date looks something like this\sidenote{I've ordered the questions from very unlikely to very likely}:
 
 \medskip
 
@@ -115,8 +117,8 @@ A \emph{tournament} consists of a number of questions. To keep things uncluttere
 \label{table:before}
 \end{table}
 
-\medskip
-
+\subsection{Situation at the expiry date of the question}
+\label{subsec:expiry}
 When the expiry date arrives, things change. Either the event has happened (result=1) or it has not (result=0). For events  with a low probability $p_{i}$ most of the time the result will be 0. But there can be surprises and a low probability event can in fact occur (see question 2 in Table~\ref{table:after}). Idem for events with a high probability: every now and then they do not materialise (see question 8 in Table~\ref{table:after}). Events with medium probabilities will be even more prone to chance. For each question a score is calculates using the formula:
 \begin{equation}
 score_{i}=(result_{i} - q_{i})^2
@@ -213,23 +215,24 @@ E(score_{total})=E(\sum_{i=1}^{i=n}score_{i})=\sum_{i=1}^{i=n}p_{i}(1-p_{i}) + \
 \label{eq:meantotal}
 \end{equation}
 
-\section{A tale of three forecasters}
+\chapter{A tale of three forecasters}
 
 We are going to look at the scores of three different forecasters. Each forecaster will take part in N tournaments\sidenote{N can be very large e.g. 10.000. It's just the computer doing all the work.} Each tournament has 100 question: 10 questions with a probability of occurence $p=0.05$, 10 questions with probability of occurence $p=0.15$, and so on in steps of $0.10$, until the last set of 10 questions with probability of occurence $p=0.95$.
 
-\subsection{The Perfect Forecaster}
+\section{The Perfect Forecaster}
 This forecaster is faultless: for every question she ''knows" the exact probability. So for every question her choice $q_{i}$ of the probability of occurence is exactly equal to $p_{i}$ of this specific question. We can calculate the expected value of the total score of the Perfect Forecaster using Equation~\ref{eq:meantotal}. The second term in this equation is always 0 because the Perfect Forecaster always chooses $q_{i}=p_{i}$:
 \begin{equation}
 \label{eq:perfect}
 E(S_{perfect})=\sum_{i=1}^{i=n}p_{i}(1-p_{i})
 \end{equation}
 
-The score of the \emph{Perfect Forecaster} is fixed once we defined the values of $p_{i}$. With the choices in this example the perfect score is $16.75$.
+The average score of the \emph{Perfect Forecaster} is fixed once we defined the values of $p_{i}$ and the number of questions $n$. With the choices in this example the average perfect score is $16.75$.
 
-<<>>=
+<<echo=FALSE>>=
 Aldous <- TRUE
-N <- 1000 # number of tournaments
+N <- 2000 # number of tournaments
 n <- 100 # number of questions per tournament
+prob.event <- seq(0.05, 0.95, by=0.1) # sequence of true probabilities
 @
 
 <<label=Perfect,fig=TRUE,include=FALSE, echo=FALSE>>=
@@ -237,7 +240,7 @@ set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and randomly chosen probabilities q in range [0,1]
 total_score_perfect <- data.frame(result=rep(0, N))
 # defining the real probabilities for each question: 10 questions with prob=0.05; 10 with prob=0.15 and so on till prob=0.95
-tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0, event=0)
+tour_run <- data.frame(p = rep(prob.event, n/10), q = 0, event=0)
 # simulating N tournaments
 for (i in (1:N)) {
   tour_run$q = tour_run$p # The perfect forecaster knows the true probabilities
@@ -253,22 +256,22 @@ ggplot(data=total_score_perfect, aes(x = result, y = ..density..)) +
   geom_density(data=total_score_perfect, aes(x = result, y = ..density..)) +
   geom_vline(xintercept=perfect_score, color="red", size=0.8) +
   xlim(0, 50) +
-  labs(title = paste("Distribution of total scores for", N, "runs"), 
+  labs(title = paste("Distribution of total scores for", N, "tournaments"), 
        subtitle = "Perfect Forecaster",
        x = "total score", 
        y = "density") +
   JT.theme
 @
 
-\begin{figure}
+\begin{marginfigure}[-4cm]
 \centering
 \includegraphics[width=200pt, height=200pt]{Tour-Perfect}
 \caption{Perfect Forecaster}
 \label{fig:Perfect}
 \setfloatalignment{b}% forces caption to be bottom-aligned
-\end{figure}
+\end{marginfigure}
 
-\subsection{The Ignorant Forecaster}
+\section{The Ignorant Forecaster}
 
 The \emph{Ignorant Forecaster} has no insight at all in the matter and chooses for each question at random\sidenote{random uniform distribution within [0,1]} a probability $q_{i}$ in the range [0,1].
 
@@ -285,7 +288,7 @@ set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and randomly chosen probabilities q in range [0,1]
 total_score_ignorant <- data.frame(result=rep(0,N))
 # defining the real probabilities for each question: 10 questions with prob=0.05; 10 with prob=0.15 and so on till prob=0.95
-tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0, event=0)
+tour_run <- data.frame(p = rep(prob.event, n/10), q = 0, event=0)
 # simulating N tournaments
 for (i in (1:N)) {
   tour_run$q = runif(n) # The ignorant forecaster just picks a value in the range [0,1]
@@ -306,41 +309,34 @@ ggplot(data=total_score_ignorant, aes(x = result, y = ..density..)) +
   annotate("text", x= gem.result.ignorant, y= 0.16, label="Ignorant", color="blue") +
   annotate("text", x= gem.result.ignorant, y= 0.15, label="Forecaster", color="blue") +
   xlim(0, 50) +
-  labs(title = paste("Distribution of total scores for", N, "runs"), 
+  labs(title = paste("Distribution of total scores for", N, "tournaments"), 
        subtitle = "Ignorant Forecaster",
        x = "total score", 
        y = "density") +
   JT.theme
 @
 
-\begin{figure}
+\begin{marginfigure}
 \centering
 \includegraphics[width=200pt, height=200pt]{Tour-Ignorant}
 \caption{Ignorant Forecaster}
 \label{fig:Ignorant}
 \setfloatalignment{b}% forces caption to be bottom-aligned
-\end{figure}
+\end{marginfigure}
 
 As we can see there is a very slight overlap between the range of scores of the \emph{Perfect Forecaster} and the \emph{Ignorant Forecaster}. Purely by chance when the event goes from a probility ($p_{i}$) to a reality ($result_{i}$), it could happen that the worst possible forecaster, beats the best one!
 
-\subsection{A Better Forecaster}
-The \emph{Better forecaster} is someone who does not make a random choice of the probability over the whole range [0,1] but, because she has information on the subject, will pick a value for $q_{i}$ that is closer to the real probability $p_{i}$. We simulate this by letting her pick a value for $q_{i}$ randomly in the range $[p_{i}-\sigma,p_{i}+\sigma]$ where $\sigma^{2}$ is the RMS error:
-\begin{equation}
-\sigma^{2} = \frac{(q_{i}-p_{i})^2}{n}
-\end{equation}
-
-<<echo=FALSE>>=
-sigma.ignorant <- sqrt((gem.result.ignorant - perfect_score)/n)
-@
-The value for $\sigma$ for the \emph{Ignorant Forecaster} is $\Sexpr{round(sigma.ignorant,2)}$. The range of choice for the \emph{Better Forecaster} will thus be $[p_{i}-\Sexpr{round(sigma.ignorant,2)},p_{i}+\Sexpr{round(sigma.ignorant,2)}]$. \sidenote{When the lower limit is smaller than 0, it will be trimmed to 0. Conversely: an upper limit above 1 will be trimmed to 1}
+\section{A Better Forecaster}
+\subsection{Model for a realistic forecaster}
+The \emph{Better Forecaster} is someone who does not make a random choice of the probability over the whole range $[0,1]$ but, because she has information on the subject, will pick a value for $q_{i}$ that is closer to the real probability $p_{i}$. In his paper prof. Aldous proposes the following model\sidenote{Simple model for predictions by contestant with RMS error $\sigma$}: a forecaster with ''error" $\sigma$ will choose for her probability $q_{i}$ either the value $p_{i}-\sigma$ or the value $p_{i}+\sigma$ with equal probability.\sidenote{So there is a 50\% chance that $q_{i}=p_{i}-\sigma$ and a 50\% chance that $q_{i}=p_{i}+\sigma$}. If $q_{i}=p_{i}-\sigma<0$ $q_{i}$ will be set to 0. Idem when $q_{i}=p_{i}+\sigma>1$ we will set $q_{i}=1$.\sidenote{Other models are possible. For example: the \emph{Better} Forecaster could pick at random a probability $q_{i}$ in the range $[p_{i}-\sigma,p_{i}+\sigma]$. Or we could use some normal distribution within this range. At the moment I will stick to prof. Aldous's model.}
 
 <<label=Better,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and 
 # randomly chosen probabilities q in range [p-sigma,p+sigma]
 total_score_better <- data.frame(result=rep(0,N))
-tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), q = 0)
-sigma <- sigma.ignorant
+tour_run <- data.frame(p = rep(prob.event, n/10), q = 0)
+sigma <- 0.4
 # i is number of tournaments
 for (i in (1:N)) {
   tour_run$lower.limit <- ifelse(tour_run$p - sigma < 0, 0, tour_run$p - sigma)
@@ -376,39 +372,105 @@ ggplot(data=total_score_better, aes(x = result, y = ..density..)) +
   geom_vline(xintercept=gem.result.ignorant, color="blue", size=0.5, linetype=2) +
   geom_vline(xintercept=gem.result.better, color="green", size=0.5) +
   xlim(0, 50) +
-  labs(title = paste("Distribution of scores for", N, "runs"), 
+  labs(title = paste("Distribution of scores for", N, "tournaments"), 
        subtitle = "Better Forecaster",
        x = "total score", 
        y = "density") +
   JT.theme
 @
 
-\begin{figure}
+\begin{marginfigure}
 \centering
 \includegraphics[width=200pt, height=200pt]{Tour-Better}
 \caption{Better Forecaster}
 \label{fig:Better}
 \setfloatalignment{b}% forces caption to be bottom-aligned
-\end{figure}
+\end{marginfigure}
 
-As we expected, the scores of the \emph{Better Forecaster} are lower. There is considerable overlap between the three forecasters. The better forecaster does not always win each individual tournament.
+As we expected, the scores of the \emph{Better Forecaster} are lower. There is considerable overlap between the three (Perfect, Ignorant and Better) forecasters. The better forecaster does not always win each individual tournament.
+\newpage
+\subsection{Five forecasters with different abilities}
+When there are five contestants with $\sigma$ values equal to $0, 0.1, 0.25, 0.5, 0.75$ we get the following picture (Figure~\ref{fig:FiveContestants}). For large values of $\sigma$, for example $\sigma=0.5$ and $\sigma=0.75$ the scores are bad. They are even worse than the score of the \emph{Ignorant Forecaster}! The reason is that the model prof. Aldous uses, forces the forecaster to pick either $q_{i}=p_{i}-\sigma$ or $q_{i}=p_{i}+\sigma$. For large values of $\sigma$ this means that either the lower limit $q_{i}=0$ or the upper limit $q_{i}=1$ will be crossed, which means that $q_{i}$ has a 50\% chance of being one of the extreme values $0$ or $1$. This is worse than the situation of the \emph{Ignorant Forecaster} who always picks a random number in the range $[0,1]$, and is not tied to the extreme values. 
 
-\section{Comparing two contestants}
+% Five contestants
+<<label=FiveContestants,fig=TRUE,include=FALSE, echo=FALSE>>=
+set.seed(2018) # setting the random number generator
+# set up data frame with known probabilities p and 
+# randomly chosen probabilities q in range [p-sigma,p+sigma]
+nC <- 5 # number of contestants
+sigma.range <- c(0, 0.1, 0.25, 0.5, 0.75)
+tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
+                   contestant = rep(rep(seq(1:nC), each=n), N),
+                   question = rep(seq(1:n), N*nC),
+                   p = rep(prob.event, N*nC*n/10),
+                   event = 0)
+tour$sigma <-sigma.range[tour$contestant]
+tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
+tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
+ifelse(Aldous==TRUE, 
+        tour$q <- ifelse(runif(n*nC*N,tour$lower.limit,tour$upper.limit)<(tour$lower.limit+tour$upper.limit)/2, 
+                              tour$lower.limit, 
+                              tour$upper.limit),
+        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
+for (i in (1:N)) {
+ tour$event[((i-1)*n*nC+ 1):(i*n*nC)] <- rep(rbinom(n,1,prob.event),nC)
+}
+tour$question.score <- (tour$event - tour$q)^2
+tour %>% 
+  group_by(tournament, contestant, sigma) %>% 
+  summarise(score=sum(question.score)) -> tournament.table1
+tournament.table2 <- tournament.table1[order(tournament.table1$tournament, tournament.table1$score),]
+tournament.table2$win <- rep(c(1,rep(0,nC-1)),N)
+tour %>% group_by(contestant, tournament) %>% summarise(som=sum(question.score)) -> tournament.table3
+t1 <- tournament.table3 %>% filter(contestant==1)
+t2 <- tournament.table3 %>% filter(contestant==2)
+t3 <- tournament.table3 %>% filter(contestant==3)
+t4 <- tournament.table3 %>% filter(contestant==4)
+t5 <- tournament.table3 %>% filter(contestant==5)
+ggplot() + 
+  geom_density(data=t1, aes(x = som, y = ..density..), color="black", size=0.5) +
+  geom_density(data=t2, aes(x = som, y = ..density..), color="blue", size=0.5) +
+  geom_density(data=t3, aes(x = som, y = ..density..), color="green", size=0.5) +
+  geom_density(data=t4, aes(x = som, y = ..density..), color="red", size=0.5) +
+  geom_density(data=t5, aes(x = som, y = ..density..), color="chocolate1", size=0.5) +
+  annotate("text", x= 16.75, y= 0.22, label="sigma=0", color="black") +
+  annotate("text", x= 21, y= 0.20, label="0.10", color="blue") +
+  annotate("text", x= 22, y= 0.16, label="0.25", color="green") +
+  annotate("text", x= 32, y= 0.125, label="0.50", color="red") +
+  annotate("text", x= 45, y= 0.095, label="0.75", color="chocolate1") +
+  xlim(0,60) +
+  labs(title = paste("Distribution of scores for", N, "tournaments"), 
+       subtitle = "Five forecasters",
+       x = "total score", 
+       y = "density") +
+  JT.theme
+@
+
+\begin{marginfigure}[-5cm]
+\centering
+\includegraphics[width=200pt, height=200pt]{Tour-FiveContestants}
+\caption{Five contestants}
+\label{fig:FiveContestants}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{marginfigure}
+
+\chapter{Tournaments with multiple contestants}
+\section{Tournaments with two contestants}
 When comparing two contestants, we could look at their \emph{average total score} over many tournaments: the Contestant with the lowest average score is the better one. However, when we look at only one tournament, it could be that the (worse) Contestant with the higher average score still performs better than the (better) Contestant with the lower average score. This is of course due to the spread of the scores \emph{around} the average value. By luck, Contestant 2 could be to the left of her average, while Contestant 1 could be to the right of her average. This seems in accordance with our intuition: in a game where both skill and chance play a role, the better player wins most of the time, but not always. As the difference of ability increases, the probability for a win for the better player increases.
+
+% Two contestants: method1
 
 <<echo=FALSE>>=
 set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and 
 # randomly chosen probabilities q in range [p-sigma,p+sigma]
-N <- 500 # number of tournaments
-n <- 100 # number of questions per run
-percentage_win_C1 <- data.frame(matrix(0, ncol = 7, nrow = 7))
-colnames(percentage_win_C1) <- as.character(seq(0, 0.3, by=0.05))
-rownames(percentage_win_C1) <- as.character(seq(0, 0.3, by=0.05))
-for (p1 in (1:7)) {
-  for (p2 in (p1:7)) {
+percentage_win_C1 <- data.frame(matrix(0, ncol = 6, nrow = 6))
+colnames(percentage_win_C1) <- as.character(seq(0.05, 0.3, by=0.05))
+rownames(percentage_win_C1) <- as.character(seq(0, 0.25, by=0.05))
+for (p1 in (1:6)) {
+  for (p2 in (p1:6)) {
 total_score_contest <- data.frame(Contestant1=rep(0,N), Contestant2=0)
-tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10), 
+tour_run <- data.frame(p = rep(prob.event, n/10), 
                        q1 = 0, q2=0,
                        lower.limitC1=0, upper.limitC1=0, 
                        lower.limitC2=0, upper.limitC2=0,
@@ -416,7 +478,7 @@ tour_run <- data.frame(p = rep(seq(0.05, 0.95, by = 0.1), n/10),
 winC1 <- 0
 winC2 <- 0
 sigma_C1 <- (p1-1)*0.05
-sigma_C2 <- (p2-1)*0.05
+sigma_C2 <- (p2)*0.05
 for (i in (1:N)) {
   tour_run$lower.limitC1 <- ifelse(tour_run$p - sigma_C1 < 0, 0, tour_run$p - sigma_C1)
   tour_run$upper.limitC1 <- ifelse(tour_run$p + sigma_C1 > 1, 1, tour_run$p + sigma_C1)
@@ -452,19 +514,26 @@ percentage_win_C1[p1,p2] <- winC1/N
 percentage_win_C1  
 @
 
-<<echo=FALSE>>=
+This table agrees with Figure 2 in prof. Aldous's paper\sidenote{The differences are probably due to the number of tournaments N and the choice of the seed for the random number generator}.
+
+\section{Tournaments with many contestants}
+
+\subsection{Groups containing Perfect Forecasters}
+
+When we have many contestants we expect the better forecaster to win more individual tournaments then the worse forecasters. Let us start with 10 forecasters, ranged from better to worse. This qualitative ranging is done by assigning each forecaster a value for $\sigma$. In the first simulations we will let $\sigma$ take values from $0$ to $0.3$.The best forecaster (number 1) is the \emph{Perfect Forecaster} which means she has a $\sigma=0$. The worst forecaster (number 10) has a $\sigma=0.3$. Intermediat forecasters have intermediate values of $\sigma$. The result is given in Figure~\ref{fig:ten}.
+% 10 contestants
+<<label=ten,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and 
 # randomly chosen probabilities q in range [p-sigma,p+sigma]
-N <- 500 # number of tournaments
-nC <- 2 # number of contestants
-n <- 100 # number of questions per run
+nC <- 10 # number of contestants
 sigma.min <- 0
-sigma.max <- 0.2
+sigma.max <- 0.3
 tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
                    contestant = rep(rep(seq(1:nC), each=n), N),
                    question = rep(seq(1:n), N*nC),
-                   p = rep(seq(0.05, 0.95, by=0.1), N*nC*n/10))
+                   p = rep(prob.event, N*nC*n/10),
+                   event = 0)
 tour$sigma <- sigma.min + (sigma.max - sigma.min)*(tour$contestant - 1)/(nC - 1)
 tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
 tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
@@ -473,21 +542,369 @@ ifelse(Aldous==TRUE,
                               tour$lower.limit, 
                               tour$upper.limit),
         tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
-tour$event <- rbinom(n*nC*N,1,tour$p)
+for (i in (1:N)) {
+ tour$event[((i-1)*n*nC+ 1):(i*n*nC)] <- rep(rbinom(n,1,prob.event),nC)
+}
 tour$question.score <- (tour$event - tour$q)^2
 tour %>% 
   group_by(tournament, contestant, sigma) %>% 
-  summarise(score=sum(question.score)) -> tournament.table
-tournament.table <- tournament.table[order(tournament.table$tournament, tournament.table$score),]
-tournament.table$win <- rep(c(1,rep(0,nC-1)),N)
-tournament.table %>% group_by(contestant, sigma) %>% summarise(som=sum(win)) -> endscore
-endscore$percentage <- endscore$som/N
-endscore
+  summarise(score=sum(question.score)) -> tournament.table1
+tournament.table2 <- tournament.table1[order(tournament.table1$tournament, tournament.table1$score),]
+tournament.table2$win <- rep(c(1,rep(0,nC-1)),N)
+tournament.table2 %>% group_by(contestant, sigma) %>% summarise(som=sum(win)) -> endscore
+ggplot(data=endscore, aes(x=contestant, y=som)) + 
+  geom_bar(stat="identity") +
+  xlim(0,nC) +
+  labs(title = "Tournament wins for each contestant", 
+       subtitle = paste(nC,"forecasters"),
+       x = "contestant", 
+       y = paste("number of wins in", N,"tournaments")) +
+  JT.theme
 @
 
-<<>>=
-endscore 
+\begin{marginfigure}[0cm]
+\centering
+\includegraphics[width=200pt, height=200pt]{Tour-ten}
+\caption{10 contestants}
+\label{fig:ten}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{marginfigure}
+
+All seems as we would expect it: the best forecaster wins the most tournaments.
+
+However: things change when the number of forecasters increases. Figure~\ref{fig:twenty} already shows another picture when we have twenty forecasters.
+
+% 20 contestants
+<<label=twenty,fig=TRUE,include=FALSE, echo=FALSE>>=
+set.seed(2018) # setting the random number generator
+# set up data frame with known probabilities p and 
+# randomly chosen probabilities q in range [p-sigma,p+sigma]
+nC <- 20 # number of contestants
+sigma.min <- 0
+sigma.max <- 0.3
+tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
+                   contestant = rep(rep(seq(1:nC), each=n), N),
+                   question = rep(seq(1:n), N*nC),
+                   p = rep(prob.event, N*nC*n/10),
+                   event = 0)
+tour$sigma <- sigma.min + (sigma.max - sigma.min)*(tour$contestant - 1)/(nC - 1)
+tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
+tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
+ifelse(Aldous==TRUE, 
+        tour$q <- ifelse(runif(n*nC*N,tour$lower.limit,tour$upper.limit)<(tour$lower.limit+tour$upper.limit)/2, 
+                              tour$lower.limit, 
+                              tour$upper.limit),
+        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
+for (i in (1:N)) {
+ tour$event[((i-1)*n*nC+ 1):(i*n*nC)] <- rep(rbinom(n,1,prob.event),nC)
+}
+tour$question.score <- (tour$event - tour$q)^2
+tour %>% 
+  group_by(tournament, contestant, sigma) %>% 
+  summarise(score=sum(question.score)) -> tournament.table1
+tournament.table2 <- tournament.table1[order(tournament.table1$tournament, tournament.table1$score),]
+tournament.table2$win <- rep(c(1,rep(0,nC-1)),N)
+tournament.table2 %>% group_by(contestant, sigma) %>% summarise(som=sum(win)) -> endscore
+ggplot(data=endscore, aes(x=contestant, y=som)) + 
+  geom_bar(stat="identity") +
+  xlim(0,nC) +
+  labs(title = "Tournament wins for each contestant", 
+       subtitle = paste(nC,"forecasters"),
+       x = "contestant", 
+       y = paste("number of wins in", N,"tournaments")) +
+  JT.theme
 @
+
+\begin{marginfigure}
+\centering
+\includegraphics[width=200pt, height=200pt]{Tour-twenty}
+\caption{20 contestants}
+\label{fig:twenty}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{marginfigure}
+
+When we increase the number of contestants further to 50 (Figure~\ref{fig:fifty}) the \emph{Paradox} reveals itself: the better forecasters are winning less and less tournaments! As prof. Aldous explains, this should not surprise us. The reason is that in these simulations we keep the total range for $\sigma$ constant between $0$ and $0.3$. The difference in the value of $\sigma$ of two sequential contestants is:
+\begin{equation}
+\delta_{\sigma}=\frac{(\sigma_{max}-\sigma_{min})}{(n_{C}-1)} \quad with \quad n_{C}=number \quad of \quad contestants
+\end{equation}
+
+% 50 contestants
+<<label=fifty,fig=TRUE,include=FALSE, echo=FALSE>>=
+set.seed(2018) # setting the random number generator
+# set up data frame with known probabilities p and 
+# randomly chosen probabilities q in range [p-sigma,p+sigma]
+nC <- 50 # number of contestants
+sigma.min <- 0
+sigma.max <- 0.3
+tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
+                   contestant = rep(rep(seq(1:nC), each=n), N),
+                   question = rep(seq(1:n), N*nC),
+                   p = rep(prob.event, N*nC*n/10),
+                   event = 0)
+tour$sigma <- sigma.min + (sigma.max - sigma.min)*(tour$contestant - 1)/(nC - 1)
+tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
+tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
+ifelse(Aldous==TRUE, 
+        tour$q <- ifelse(runif(n*nC*N,tour$lower.limit,tour$upper.limit)<(tour$lower.limit+tour$upper.limit)/2, 
+                              tour$lower.limit, 
+                              tour$upper.limit),
+        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
+for (i in (1:N)) {
+ tour$event[((i-1)*n*nC+ 1):(i*n*nC)] <- rep(rbinom(n,1,prob.event),nC)
+}
+tour$question.score <- (tour$event - tour$q)^2
+tour %>% 
+  group_by(tournament, contestant, sigma) %>% 
+  summarise(score=sum(question.score)) -> tournament.table1
+tournament.table2 <- tournament.table1[order(tournament.table1$tournament, tournament.table1$score),]
+tournament.table2$win <- rep(c(1,rep(0,nC-1)),N)
+tournament.table2 %>% group_by(contestant, sigma) %>% summarise(som=sum(win)) -> endscore
+ggplot(data=endscore, aes(x=contestant, y=som)) + 
+  geom_bar(stat="identity") +
+  xlim(0,nC) +
+  labs(title = "Tournament wins for each contestant", 
+       subtitle = paste(nC,"forecasters"),
+       x = "contestant", 
+       y = paste("number of wins in", N,"tournaments")) +
+  JT.theme
+@
+
+\begin{marginfigure}
+\centering
+\includegraphics[width=200pt, height=200pt]{Tour-fifty}
+\caption{50 contestants}
+\label{fig:fifty}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{marginfigure}
+
+With $\sigma_{max}=0.3$ and $\sigma_{min}=0$ the difference between two sequential contestants will be \Sexpr{round(0.3/9,3)} when there are 10 contestants, but only \Sexpr{round(0.3/49,3)} when there are 50 contestants. In the latter case the level of ability will be almost the same for two sequential contestants. When more and more contestants are added (up to 300 in prof. Aldous's paper), the distinction between two sequential contestants becomes almost indistinguishable.
+
+\subsection{Explanation}
+The very good contestants have a very small value of $\sigma$ which means they will act like the \emph{Perfect Forecaster} and pick $q_{i}=p_{i}$. However, as we have seen in \ref{subsec:expiry}, the important thing is that the score is not based on the difference $(q_{i}-p_{i})$ but on the difference $(result_{i}-p_{i})$, where $result_{i}$ has the value $0$ or $1$ depending on establishing that event $i$ took place (or not). The very good forecasters will get a score of $(0-p_{i})^2$ or $(1-p_{i})^2$ for this question. A contestant who has a $\sigma=0.1$ will get a score of $(\pm 0.1-p_{i})^2$ or $(1 \pm 0.1-p_{i})^2$. Usually this will be worse than the former. However, with a lot of contestants, a few with a $\sigma$ close to $0.1$ will get lucky and beat the better forecasters. This effect should decrease when we do not have \emph{Perfect Forecasters} in our group, or in other words that all forecasters are flawed and have a $\sigma>0$.
+
+\subsection{Groups where all contestants are flawed}
+The model is now that $\sigma_{min} > 0$. Prof. Aldous puts $\sigma_{min}=0.15$ and keeps the range between the minimum and maximum value of $\sigma$ equal to $0.3$. The results can be seen in Figure~\ref{fig:fiftyflawed}: the better players start winning the most tournaments. The ''chance" element which occurs at the moment that the event materialises (or not) is however still strong, which means that poorer forecasters still win a considerable number of tournaments.
+
+% 50 flawed contestants
+<<label=fiftyflawed,fig=TRUE,include=FALSE, echo=FALSE>>=
+set.seed(2018) # setting the random number generator
+# set up data frame with known probabilities p and 
+# randomly chosen probabilities q in range [p-sigma,p+sigma]
+nC <- 50 # number of contestants
+sigma.min <- 0.15
+sigma.max <- 0.45
+tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
+                   contestant = rep(rep(seq(1:nC), each=n), N),
+                   question = rep(seq(1:n), N*nC),
+                   p = rep(prob.event, N*nC*n/10),
+                   event = 0)
+tour$sigma <- sigma.min + (sigma.max - sigma.min)*(tour$contestant - 1)/(nC - 1)
+tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
+tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
+ifelse(Aldous==TRUE, 
+        tour$q <- ifelse(runif(n*nC*N,tour$lower.limit,tour$upper.limit)<(tour$lower.limit+tour$upper.limit)/2, 
+                              tour$lower.limit, 
+                              tour$upper.limit),
+        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
+for (i in (1:N)) {
+ tour$event[((i-1)*n*nC+ 1):(i*n*nC)] <- rep(rbinom(n,1,prob.event),nC)
+}
+tour$question.score <- (tour$event - tour$q)^2
+tour %>% 
+  group_by(tournament, contestant, sigma) %>% 
+  summarise(score=sum(question.score)) -> tournament.table1
+tournament.table2 <- tournament.table1[order(tournament.table1$tournament, tournament.table1$score),]
+tournament.table2$win <- rep(c(1,rep(0,nC-1)),N)
+tournament.table2 %>% group_by(contestant, sigma) %>% summarise(som=sum(win)) -> endscore
+ggplot(data=endscore, aes(x=contestant, y=som)) + 
+  geom_bar(stat="identity") +
+  xlim(0,nC) +
+  labs(title = "Tournament wins for each contestant", 
+       subtitle = paste(nC,"forecasters"),
+       x = "contestant", 
+       y = paste("number of wins in", N,"tournaments")) +
+  JT.theme
+@
+
+\begin{marginfigure}
+\centering
+\includegraphics[width=200pt, height=200pt]{Tour-fiftyflawed}
+\caption{50 flawed contestants}
+\label{fig:fiftyflawed}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{marginfigure}
+
+\chapter{Another forecaster model}
+
+\section{Distribution of the total scores for different contestants}
+If we take a more gentle model for the \emph{Better Forecaster}, and allow her to pick a random number in the range $[p_{i}-\sigma,p_{i}+\sigma]$ the total scores of the realistic forecaster get better (Figure~\ref{fig:FiveTRJ}) compared with Figure~\ref{fig:FiveContestants}.
+
+<<echo=FALSE>>=
+Aldous=FALSE #Pick model TRJ
+@
+% Five contestants model TRJ
+<<label=FiveTRJ,fig=TRUE,include=FALSE, echo=FALSE>>=
+set.seed(2018) # setting the random number generator
+# set up data frame with known probabilities p and 
+# randomly chosen probabilities q in range [p-sigma,p+sigma]
+nC <- 5 # number of contestants
+sigma.range <- c(0, 0.1, 0.25, 0.5, 0.75)
+tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
+                   contestant = rep(rep(seq(1:nC), each=n), N),
+                   question = rep(seq(1:n), N*nC),
+                   p = rep(prob.event, N*nC*n/10),
+                   event = 0)
+tour$sigma <-sigma.range[tour$contestant]
+tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
+tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
+ifelse(Aldous==TRUE, 
+        tour$q <- ifelse(runif(n*nC*N,tour$lower.limit,tour$upper.limit)<(tour$lower.limit+tour$upper.limit)/2, 
+                              tour$lower.limit, 
+                              tour$upper.limit),
+        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
+for (i in (1:N)) {
+ tour$event[((i-1)*n*nC+ 1):(i*n*nC)] <- rep(rbinom(n,1,prob.event),nC)
+}
+tour$question.score <- (tour$event - tour$q)^2
+tour %>% 
+  group_by(tournament, contestant, sigma) %>% 
+  summarise(score=sum(question.score)) -> tournament.table1
+tournament.table2 <- tournament.table1[order(tournament.table1$tournament, tournament.table1$score),]
+tournament.table2$win <- rep(c(1,rep(0,nC-1)),N)
+tour %>% group_by(contestant, tournament) %>% summarise(som=sum(question.score)) -> tournament.table3
+t1 <- tournament.table3 %>% filter(contestant==1)
+t2 <- tournament.table3 %>% filter(contestant==2)
+t3 <- tournament.table3 %>% filter(contestant==3)
+t4 <- tournament.table3 %>% filter(contestant==4)
+t5 <- tournament.table3 %>% filter(contestant==5)
+ggplot() + 
+  geom_density(data=t1, aes(x = som, y = ..density..), color="black", size=0.5) +
+  geom_density(data=t2, aes(x = som, y = ..density..), color="blue", size=0.5) +
+  geom_density(data=t3, aes(x = som, y = ..density..), color="green", size=0.5) +
+  geom_density(data=t4, aes(x = som, y = ..density..), color="red", size=0.5) +
+  geom_density(data=t5, aes(x = som, y = ..density..), color="chocolate1", size=0.5) +
+  annotate("text", x= 16.75, y= 0.22, label="sigma=0", color="black") +
+  annotate("text", x= 20.5, y= 0.20, label="0.10", color="blue") +
+  annotate("text", x= 21, y= 0.19, label="0.25", color="green") +
+  annotate("text", x= 24, y= 0.185, label="0.50", color="red") +
+  annotate("text", x= 30, y= 0.15, label="0.75", color="chocolate1") +
+  xlim(0,60) +
+  labs(title = paste("Distribution of scores for", N, "tournaments"), 
+       subtitle = "Five forecasters: uniform model in [p-sigma,p+sigma]",
+       x = "total score", 
+       y = "density") +
+  JT.theme
+@
+
+\begin{marginfigure}[0cm]
+\centering
+\includegraphics[width=200pt, height=200pt]{Tour-FiveTRJ}
+\caption{Five contestants with random pick in interval [p-sigma,p+sigma]}
+\label{fig:FiveTRJ}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{marginfigure}
+
+\section{Tournaments with 50 competitors}
+\subsection{Groups with Perfect Forecasters}
+% 50 contestants
+<<label=fiftyTRJ,fig=TRUE,include=FALSE, echo=FALSE>>=
+set.seed(2018) # setting the random number generator
+# set up data frame with known probabilities p and 
+# randomly chosen probabilities q in range [p-sigma,p+sigma]
+nC <- 50 # number of contestants
+sigma.min <- 0
+sigma.max <- 0.3
+tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
+                   contestant = rep(rep(seq(1:nC), each=n), N),
+                   question = rep(seq(1:n), N*nC),
+                   p = rep(prob.event, N*nC*n/10),
+                   event = 0)
+tour$sigma <- sigma.min + (sigma.max - sigma.min)*(tour$contestant - 1)/(nC - 1)
+tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
+tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
+ifelse(Aldous==TRUE, 
+        tour$q <- ifelse(runif(n*nC*N,tour$lower.limit,tour$upper.limit)<(tour$lower.limit+tour$upper.limit)/2, 
+                              tour$lower.limit, 
+                              tour$upper.limit),
+        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
+for (i in (1:N)) {
+ tour$event[((i-1)*n*nC+ 1):(i*n*nC)] <- rep(rbinom(n,1,prob.event),nC)
+}
+tour$question.score <- (tour$event - tour$q)^2
+tour %>% 
+  group_by(tournament, contestant, sigma) %>% 
+  summarise(score=sum(question.score)) -> tournament.table1
+tournament.table2 <- tournament.table1[order(tournament.table1$tournament, tournament.table1$score),]
+tournament.table2$win <- rep(c(1,rep(0,nC-1)),N)
+tournament.table2 %>% group_by(contestant, sigma) %>% summarise(som=sum(win)) -> endscore
+ggplot(data=endscore, aes(x=contestant, y=som)) + 
+  geom_bar(stat="identity") +
+  xlim(0,nC) +
+  labs(title = "Tournament wins for each contestant\n uniform model in [p-sigma,p+sigma]", 
+       subtitle = paste(nC,"forecasters"),
+       x = "contestant", 
+       y = paste("number of wins in", N,"tournaments")) +
+  JT.theme
+@
+
+\begin{marginfigure}
+\centering
+\includegraphics[width=200pt, height=200pt]{Tour-fiftyTRJ}
+\caption{50 contestants - model TRJ}
+\label{fig:fiftyTRJ}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{marginfigure}
+
+\subsection{Groups without Perfect Forecasters}
+
+% 50 flawed contestants
+<<label=fiftyflawedTRJ,fig=TRUE,include=FALSE, echo=FALSE>>=
+set.seed(2018) # setting the random number generator
+# set up data frame with known probabilities p and 
+# randomly chosen probabilities q in range [p-sigma,p+sigma]
+nC <- 50 # number of contestants
+sigma.min <- 0.15
+sigma.max <- 0.45
+tour <- data.frame(tournament = rep(seq(1:N), each=n*nC),
+                   contestant = rep(rep(seq(1:nC), each=n), N),
+                   question = rep(seq(1:n), N*nC),
+                   p = rep(prob.event, N*nC*n/10),
+                   event = 0)
+tour$sigma <- sigma.min + (sigma.max - sigma.min)*(tour$contestant - 1)/(nC - 1)
+tour$lower.limit <- ifelse(tour$p - tour$sigma < 0, 0, tour$p - tour$sigma)
+tour$upper.limit <- ifelse(tour$p + tour$sigma > 1, 1, tour$p + tour$sigma)
+ifelse(Aldous==TRUE, 
+        tour$q <- ifelse(runif(n*nC*N,tour$lower.limit,tour$upper.limit)<(tour$lower.limit+tour$upper.limit)/2, 
+                              tour$lower.limit, 
+                              tour$upper.limit),
+        tour$q <- runif(n*nC*N, tour$lower.limit, tour$upper.limit))
+for (i in (1:N)) {
+ tour$event[((i-1)*n*nC+ 1):(i*n*nC)] <- rep(rbinom(n,1,prob.event),nC)
+}
+tour$question.score <- (tour$event - tour$q)^2
+tour %>% 
+  group_by(tournament, contestant, sigma) %>% 
+  summarise(score=sum(question.score)) -> tournament.table1
+tournament.table2 <- tournament.table1[order(tournament.table1$tournament, tournament.table1$score),]
+tournament.table2$win <- rep(c(1,rep(0,nC-1)),N)
+tournament.table2 %>% group_by(contestant, sigma) %>% summarise(som=sum(win)) -> endscore
+ggplot(data=endscore, aes(x=contestant, y=som)) + 
+  geom_bar(stat="identity") +
+  xlim(0,nC) +
+  labs(title = "Tournament wins for each contestant\n uniform model in [p-sigma,p+sigma]", 
+       subtitle = paste(nC,"forecasters"),
+       x = "contestant", 
+       y = paste("number of wins in", N,"tournaments")) +
+  JT.theme
+@
+
+\begin{marginfigure}
+\centering
+\includegraphics[width=200pt, height=200pt]{Tour-fiftyflawedTRJ}
+\caption{50 flawed contestants - model TRJ}
+\label{fig:fiftyflawedTRJ}
+\setfloatalignment{b}% forces caption to be bottom-aligned
+\end{marginfigure}
 
 \newpage
 \textbf{Thanks} \\
