@@ -84,7 +84,7 @@ JT.theme <- theme(panel.border = element_rect(fill = NA, colour = "gray10"),
 % Functions
 
 \frontmatter
-\chapter*{Notes on "A Prediction Tournament Paradox - David J. Aldous"}
+\chapter*{Notes on "A Prediction Tournament Paradox" $\quad$ $\quad$ David J. Aldous}
 \chaptermark*{Jan Trommelmans}
 
 \chapter*{Introduction}
@@ -99,13 +99,13 @@ From these notes I tend to conclude that the paradox is the result of the specia
 
 \section{Forecasting and calculating the score}
 
-\subsection{Probabilities of events and choices by the forecaster}
-A \emph{tournament} consists of a number of questions. To keep things uncluttered let us start with 10 questions. All these questions have an, unknown, probability $p_{i} \quad i=1 \ldots 10$ that they will actually happen before or on a specific date. Let's assume that some questions deal with events that are very unlikely (low $p_{i}$), some are a toss up, and some are highly likely (high $p_{i}$). A forecaster\sidenote{To avoid to write every time ''he/she", from now on I will assume the forecaster to be female} proposes for each question a probability $q_{i} \quad i=1 \ldots 10$ that the event will occur. The choices she makes depend of course on the knowledge she has on the subject matter of the question in case. The situation before the expiry date looks something like this\sidenote{I've ordered the questions from very unlikely to very likely}:
+\subsection{Probabilities of events and choices made by the forecaster}
+A \emph{tournament} consists of a number of questions. To keep things uncluttered let us start with 10 questions. All these questions have an, unknown, probability $p_{i} \quad (i=1 \ldots 10)$ that an event will actually happen before or on a specific date. Let's assume that some questions deal with events that are very unlikely (low $p_{i}$), some are a toss up, and some are highly likely (high $p_{i}$). A forecaster\sidenote[][-2cm]{To avoid to write every time ''he/she", from now on I will assume the forecaster to be female} proposes for each question a probability $q_{i} \quad i=1 \ldots 10$ that the event will occur. The choices she makes depend of course on the knowledge she has on the subject matter of the question in case. The situation before the expiry date looks something like Table~\ref{table:before}\sidenote[][-2.5cm]{The questions are ordered from very unlikely to very likely}:
 
 \medskip
 
-\begin{table}
-\caption{Before expiry date}
+\begin{margintable}[-2cm]
+\caption{Before end of tournament}
 \centering
 \begin{tabular}{ c | c | c | }
   question & $p_{i}$ & $q_{i}$ \\
@@ -122,19 +122,24 @@ A \emph{tournament} consists of a number of questions. To keep things uncluttere
   10 & 0.95 & 1
 \end{tabular}
 \label{table:before}
-\end{table}
+\end{margintable}
 
-\subsection{Situation at the expiry date of the question}
+\subsection{Situation at the end of the tournament}
 \label{subsec:expiry}
 When the expiry date arrives, things change. Either the event has happened (result=1) or it has not (result=0). For events  with a low probability $p_{i}$ most of the time the result will be 0. But there can be surprises and a low probability event can in fact occur (see question 2 in Table~\ref{table:after}). Idem for events with a high probability: every now and then they do not materialise (see question 8 in Table~\ref{table:after}). Events with medium probabilities will be even more prone to chance. For each question a score is calculates using the formula:
 \begin{equation}
 score_{i}=(result_{i} - q_{i})^2
 \end{equation}
 
+The total score is then:
+\begin{equation}
+score_{total}=\sum_{i=1}^{i=n}score_{i}=\sum_{i=1}^{i=n}\left( result_{i} - q_{i} \right)^{2} \quad \text{n= number of questions}
+\end{equation}
+
 \medskip
 
-\begin{table}
-\caption{After expiry date}
+\begin{margintable}[-6cm]
+\caption{Situation at end date of tournament}
 \centering
 \begin{tabular}{ c | c | c || c | c}
   question & $p_{i}$ & $q_{i}$ & $result_{i}$ & $score_{i}$\\
@@ -153,43 +158,43 @@ score_{i}=(result_{i} - q_{i})^2
    &  &  &  & $2.989$
 \end{tabular}
 \label{table:after}
-\end{table}
+\end{margintable}
 
 \medskip
 
-\newthought{It is very important to realise} that if we run a second tournament with 10 questions with the same probabilities $p_{i}$, and the forecaster would give exactly the same answers for the probabilities $q_{i}$, the total score could be different! This is because of the intermediate step where at the expiry date the event changes from a \emph{probability} $p_{i}$ into a \emph{reality} $result_{i}$: it happens or it does not happen. An event with probability 30\% could for example ''not happen" in the first tournament, but ''happens" in the second tournament. So it could be that in tournament 2 we get the following results (note the change in the result for questions 2 and 8):
+\newthought{It is very important to realise} that if we run a second tournament with 10 questions with the same probabilities $p_{i}$, and the forecaster would give exactly the same answers for the probabilities $q_{i}$, the total score could be different! This is because of the intermediate step where at the expiry date of an event it changes from a \emph{probability} $p_{i}$ into a \emph{reality} $result_{i}$: it happens or it does not happen. An event with probability 30\% could for example ''not happen" in the first tournament, but ''happen" in the second tournament. So it could be that in tournament 2 we get the following results (Table~\ref{table:tournament2}) (note the change in the result for questions 2 and 8):
 
 \medskip
 
-\begin{table}
+\begin{margintable}[-4cm]
 \caption{Tournament 2}
 \centering
 \begin{tabular}{ c | c | c || c | c}
   question & $p_{i}$ & $q_{i}$ & $result_{i}$ & $score_{i}$\\
   \hline
   1 & 0.05 & 0.14 & 0 & $0.14^{2}=0.0196$\\
-  2 & 0.15 & 0.06 & 0 & $0.06^{2}=0.0036$\\
+  2 & 0.15 & 0.06 & \textbf{0} & $0.06^{2}=0.0036$\\
   3 & 0.25 & 0.19 & 0 & $0.19^{2}=0.0361$\\
   4 & 0.35 & 0.43 & 0 & $0.43^{2}=0.1849$\\
   5 & 0.45 & 0.23 & 1 & $0.77^{2}=0.5929$\\
   6 & 0.55 & 0.71 & 1 & $0.29^{2}=0.0841$\\
   7 & 0.65 & 0.66 & 0 & $0.66^{2}=0.4356$\\
-  8 & 0.75 & 0.81 & 1 & $0.19^{2}=0.0361$\\
+  8 & 0.75 & 0.81 & \textbf{1} & $0.19^{2}=0.0361$\\
   9 & 0.85 & 0.69 & 1 & $0.31^{2}=0.0961$\\
   10 & 0.95 & 1 & 1 & $0^{2}=0$\\
   \hline
    &  &  &  & $1.489$
 \end{tabular}
 \label{table:tournament2}
-\end{table}
+\end{margintable}
 
 \medskip
 
-The same forecaster, giving the same predictions based on her knowledge about questions with the same probabilities, will get a different score because there is an uncontrollable factor ''chance" that makes the event happen on one occasion but not on the other. From this it follows that if we run 1000 tournaments with 100 questions with the same actual probabilities ($p_{i}$), and the forecaster gives the same estimate ($q_{i}$) for the probability that the event will occur, we will get 1000 slightly different total scores. In short: the total score will show some variation around an average value of the total score.
+The same forecaster, giving the same predictions based on her know-ledge about questions with the same probabilities, will get a different score because there is an uncontrollable factor ''chance" that makes the event happen on one occasion but not on another. From this it follows that if we run 1000 tournaments with 100 questions with the same actual probabilities ($p_{i}$), and the forecaster gives the same estimate ($q_{i}$) for the probability that the event will occur, we will get 1000 slightly different total scores. In short: the total score will show some variation around an average value of the total score.
 
-\section{Expected value of the score}
+\section{Average (or Expected) value of the score}
 
-The \emph{Expected} (or average) \emph{value} of the total score can be calculated. If we have a variable that depends on chance (such as the total score) it can have different values with different probabilities. In our case the score on question $i$ can have two values:
+When we have a variable that depends on chance (such as the total score) it can have different values with different probabilities. In our case the score on question $i$ can have two values:
 \begin{equation}
   \begin{split}
   \text{if the event occurs:} & \quad  score_{i}=(1-q_{i})^2 \\
@@ -210,8 +215,7 @@ You can find the \emph{Expected Value} of the score by multiplying the possible 
   \begin{split}
     E(score_{i})&=(1-q_{i})^2(p_{i}) + (q_{i})^2(1-p_{i}) \\
     &= (p_{i} - 2p_{i}q_{i} + p_{i}q_{i}^2) + (q_{i}^{2}-p_{i}q_{i}^{2}) \\
-    &= p_{i} - 2p_{i}q_{i}+q_{i}^{2} \\
-    &=p_{i} - p_{i}^{2} + p_{i}^{2} - 2p_{i}q_{i}+q_{i}^{2} \\
+    &= p_{i} - 2p_{i}q_{i}+q_{i}^{2} = p_{i} - p_{i}^{2} + p_{i}^{2} - 2p_{i}q_{i}+q_{i}^{2} \\
     &= p_{i}(1-p_{i}) + (q_{i}-p_{i})^{2}
   \end{split}
 \end{equation}
@@ -224,20 +228,20 @@ E(score_{total})=E(\sum_{i=1}^{i=n}score_{i})=\sum_{i=1}^{i=n}p_{i}(1-p_{i}) + \
 
 \chapter{A tale of three forecasters}
 
-We are going to look at the scores of three different forecasters. Each forecaster will take part in N tournaments\sidenote{N can be very large e.g. 10.000. It's just the computer doing all the work.} Each tournament has 100 question: 10 questions with a probability of occurence $p=0.05$, 10 questions with probability of occurence $p=0.15$, and so on in steps of $0.10$, until the last set of 10 questions with probability of occurence $p=0.95$.
+We are going to look at the scores of three different forecasters. Each forecaster will take part in N tournaments\sidenote{N can be very large e.g. 10.000. It's just the computer doing all the work}. Each tournament has 100 question: 10 questions about events with a probability of occurence $p=0.05$, 10 questions with probability of occurence $p=0.15$, and so on in steps of $0.10$, until the last set of 10 questions about events with probability of occurence $p=0.95$.
 
 \section{The Perfect Forecaster}
-This forecaster is faultless: for every question she ''knows" the exact probability. So for every question her choice $q_{i}$ of the probability of occurence is exactly equal to $p_{i}$ of this specific question. We can calculate the expected value of the total score of the Perfect Forecaster using Equation~\ref{eq:meantotal}. The second term in this equation is always 0 because the Perfect Forecaster always chooses $q_{i}=p_{i}$:
+This forecaster is faultless: for every question she ''knows" the exact probability. So for every question her choice $q_{i}$ of the probability of occurence ot the event is exactly equal to $p_{i}$. We can calculate the expected value of the total score of the Perfect Forecaster using Equation~\ref{eq:meantotal}. The second term in this equation is 0 because the Perfect Forecaster always chooses $q_{i}=p_{i}$:
 \begin{equation}
 \label{eq:perfect}
 E(S_{perfect})=\sum_{i=1}^{i=n}p_{i}(1-p_{i})
 \end{equation}
 
-The average score of the \emph{Perfect Forecaster} is fixed once we defined the values of $p_{i}$ and the number of questions $n$. With the choices in this example the average perfect score is $16.75$.
+The average score of the \emph{Perfect Forecaster} is fixed once we have chosen the values of $p_{i}$ and the number of questions $n$. In this example the average perfect score is $16.75$. As explained in \ref{subsec:expiry} the end scores for the different tournaments will lie around this average score (Figure~\ref{fig:Perfect}).
 
 <<echo=FALSE>>=
 Aldous <- TRUE
-N <- 1000 # number of tournaments
+N <- 100 # number of tournaments
 n <- 100 # number of questions per tournament
 prob.event <- seq(0.05, 0.95, by=0.1) # sequence of true probabilities
 @
@@ -257,7 +261,7 @@ for (i in (1:N)) {
 }
 perfect_score <- sum(tour_run$p*(1-tour_run$p))
 gem.result.perfect <- mean(total_score_perfect$result)
-ggplot(data=total_score_perfect, aes(x = result, y = ..density..)) +
+ggplot() +
   geom_histogram(data=total_score_perfect, aes(x = result, y = ..density..), 
                  binwidth=1, fill="lightblue", color="grey60", size=0.2) +
   geom_density(data=total_score_perfect, aes(x = result, y = ..density..)) +
@@ -270,7 +274,7 @@ ggplot(data=total_score_perfect, aes(x = result, y = ..density..)) +
   JT.theme
 @
 
-\begin{marginfigure}[-4cm]
+\begin{marginfigure}[-7cm]
 \centering
 \includegraphics[width=200pt, height=200pt]{Tour-Perfect}
 \caption{Perfect Forecaster}
@@ -288,7 +292,7 @@ Her average total score is given by Equation~\ref{eq:meantotal}:
 E(S_{ignorant})=\sum_{i=1}^{i=n}p_{i}(1-p_{i}) + \sum_{i=1}^{i=n}(q_{i}-p_{i})^{2} = \sum_{i=1}^{i=n}p_{i}(1-p_{i}) + n\sigma_{ignorant}^2
 \end{equation}
 
-Because the second term is always positive, the average total score of the Ignorant Forecaster will always be greater that the score of the Perfect Forecaster. You cannot do worse than this, so this score will be the \emph{maximum} value of the average score.
+Because the second term is always positive, the average total score of the Ignorant Forecaster will always be higher that the average score of the Perfect Forecaster.
 
 <<label=Ignorant,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
@@ -331,11 +335,11 @@ ggplot(data=total_score_ignorant, aes(x = result, y = ..density..)) +
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{marginfigure}
 
-As we can see there is a very slight overlap between the range of scores of the \emph{Perfect Forecaster} and the \emph{Ignorant Forecaster}. Purely by chance when the event goes from a probility ($p_{i}$) to a reality ($result_{i}$), it could happen that the worst possible forecaster, beats the best one!
+As we can see (Figure~\ref{fig:Ignorant} there is a very slight overlap between the range of scores of the \emph{Perfect Forecaster} and the \emph{Ignorant Forecaster}. So it could happen that in some tournaments the worst possible forecaster, beats the best one! But it is very unlikely.
 
-\section{A Better Forecaster}
+\section{A Realistic Forecaster}
 \subsection{Model for a realistic forecaster}
-The \emph{Better Forecaster} is someone who does not make a random choice of the probability over the whole range $[0,1]$ but, because she has information on the subject, will pick a value for $q_{i}$ that is closer to the real probability $p_{i}$. In his paper prof. Aldous proposes the following model\sidenote{Simple model for predictions by contestant with RMS error $\sigma$}: a forecaster with ''error" $\sigma$ will choose for her probability $q_{i}$ either the value $p_{i}-\sigma$ or the value $p_{i}+\sigma$ with equal probability.\sidenote{So there is a 50\% chance that $q_{i}=p_{i}-\sigma$ and a 50\% chance that $q_{i}=p_{i}+\sigma$}. If $q_{i}=p_{i}-\sigma<0$ $q_{i}$ will be set to 0. Idem when $q_{i}=p_{i}+\sigma>1$ we will set $q_{i}=1$.\sidenote{Other models are possible. For example: the \emph{Better} Forecaster could pick at random a probability $q_{i}$ in the range $[p_{i}-\sigma,p_{i}+\sigma]$. Or we could use some normal distribution within this range. At the moment I will stick to prof. Aldous's model.}
+The \emph{Realistic Forecaster} is someone who does not make a random choice of the probability within the whole range $[0,1]$ but, because of her ability, she will pick a value for $q_{i}$ that is closer to the real probability $p_{i}$. In his paper prof. Aldous proposes the following model\sidenote[][-1cm]{Simple model for predictions by contestant with RMS error $\sigma$}: a forecaster with ''error" $\sigma$ will choose for her probability $q_{i}$ either the value $(p_{i}-\sigma)$ or the value $(p_{i}+\sigma)$ with equal probability.\sidenote[][-0.5cm]{So there is a 50\% chance that $q_{i}=(p_{i}-\sigma)$ and a 50\% chance that $q_{i}=(p_{i}+\sigma)$}. If $q_{i}=(p_{i}-\sigma)<0$ $q_{i}$ will be set to 0. Idem when $q_{i}=(p_{i}+\sigma)>1$ we will set $q_{i}=1$.\sidenote{Other models are possible. For example: the \emph{Realistic Forecaster} could pick at random a probability $q_{i}$ in the range $[(p_{i}-\sigma),(p_{i}+\sigma)]$. Or we could use some normal distribution within this range. At the moment let us stick to prof. Aldous's model.}
 
 <<label=Better,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
@@ -348,7 +352,7 @@ sigma <- 0.4
 for (i in (1:N)) {
   tour_run$lower.limit <- ifelse(tour_run$p - sigma < 0, 0, tour_run$p - sigma)
   tour_run$upper.limit <- ifelse(tour_run$p + sigma > 1, 1, tour_run$p + sigma)
-# The better forecaster picks either [p-sigma] (50% chance) or [p+sigma] (50% chance) - (David J. Aldous)
+# The Realistic Forecaster picks either [p-sigma] (50% chance) or [p+sigma] (50% chance) - (David J. Aldous)
 # or
 # picks a value in the range [p-sigma,p+sigma] - (J. Trommelmans)
 #
@@ -374,7 +378,7 @@ ggplot(data=total_score_better, aes(x = result, y = ..density..)) +
   geom_vline(xintercept=perfect_score, color="red", size=0.5, linetype=2) +
   annotate("text", x= perfect_score, y= 0.21, label="Perfect", color="red") +
   annotate("text", x= perfect_score, y= 0.20, label="Forecaster", color="red") +
-  annotate("text", x= gem.result.better, y= 0.19, label="Better", color="black") +
+  annotate("text", x= gem.result.better, y= 0.19, label="Realistic", color="black") +
   annotate("text", x= gem.result.better, y= 0.18, label="Forecaster", color="black") +
   annotate("text", x= gem.result.ignorant, y= 0.15, label="Ignorant", color="blue") +
   annotate("text", x= gem.result.ignorant, y= 0.14, label="Forecaster", color="blue") +
@@ -382,24 +386,24 @@ ggplot(data=total_score_better, aes(x = result, y = ..density..)) +
   geom_vline(xintercept=gem.result.better, color="green", size=0.5) +
   xlim(0, 50) +
   labs(title = paste("Distribution of scores for", N, "tournaments"), 
-       subtitle = "Better Forecaster",
+       subtitle = "Realistic Forecaster",
        x = "total score", 
        y = "density") +
   JT.theme
 @
 
-\begin{marginfigure}
+\begin{figure}
 \centering
 \includegraphics[width=200pt, height=200pt]{Tour-Better}
-\caption{Better Forecaster}
+\caption{Realistic Forecaster}
 \label{fig:Better}
 \setfloatalignment{b}% forces caption to be bottom-aligned
-\end{marginfigure}
+\end{figure}
 
-As we expected, the scores of the \emph{Better Forecaster} are lower. There is considerable overlap between the three (Perfect, Ignorant and Better) forecasters. The better forecaster does not always win each individual tournament.
-\newpage
+As we expected (Figures~\ref{fig:Better}), the scores of the \emph{Realistic Forecaster} lie between the scores of the \emph{Perfect Forecaster} and the \emph{Ignorant Forecaster}. There is considerable overlap between the three (Perfect, Ignorant and Realistic) forecasters. Sometimes the Realistic Forecaster wins from the \emph{Perfect Forecaster}, sometimes she loses to the \emph{Ignorant Forecaster}.
+
 \subsection{Five forecasters with different abilities}
-When there are five contestants with $\sigma$ values equal to $0, 0.1, 0.25, 0.5, 0.75$ we get the following picture (Figure~\ref{fig:FiveContestants}). For large values of $\sigma$, for example $\sigma=0.5$ and $\sigma=0.75$ the scores are bad. They are even worse than the score of the \emph{Ignorant Forecaster}! The reason is that the model prof. Aldous uses, forces the forecaster to pick either $q_{i}=p_{i}-\sigma$ or $q_{i}=p_{i}+\sigma$. For large values of $\sigma$ this means that either the lower limit $q_{i}=0$ or the upper limit $q_{i}=1$ will be crossed, which means that $q_{i}$ has a 50\% chance of being one of the extreme values $0$ or $1$. This is worse than the situation of the \emph{Ignorant Forecaster} who always picks a random number in the range $[0,1]$, and is not tied to the extreme values. 
+When there are five contestants with $\sigma$ values equal to $0, 0.1, 0.25, 0.5, 0.75$ we get Figure~\ref{fig:FiveContestants}. For large values of $\sigma$, for example $\sigma=0.5$ and $\sigma=0.75$ the scores are bad. They are even worse than the score of the \emph{Ignorant Forecaster}! The reason is that the model used by prof. Aldous, forces the forecaster to pick either $q_{i}=(p_{i}-\sigma)$ or $q_{i}=(p_{i}+\sigma)$. For large values of $\sigma$ this means that either the lower limit $q_{i}=0$ or the upper limit $q_{i}=1$ will be crossed, which means that $q_{i}$ has a 50\% chance of being one of the extreme values $0$ or $1$. This is worse than the situation of the \emph{Ignorant Forecaster} who can always pick a random number in the range $[0,1]$, and is not tied to the extreme values. 
 
 % Five contestants
 <<label=FiveContestants,fig=TRUE,include=FALSE, echo=FALSE>>=
@@ -478,8 +482,8 @@ set.seed(2018) # setting the random number generator
 percentage_win_C1 <- data.frame(matrix(0, ncol = 6, nrow = 6))
 colnames(percentage_win_C1) <- as.character(seq(0.05, 0.3, by=0.05))
 rownames(percentage_win_C1) <- as.character(seq(0, 0.25, by=0.05))
-for (p1 in (1:6)) {
-  for (p2 in (p1:6)) {
+for (j in (1:6)) {
+  for (k in (j:6)) {
 total_score_contest <- data.frame(Contestant1=rep(0,N), Contestant2=0)
 tour_run <- data.frame(p = rep(prob.event, n/10), 
                        q1 = 0, q2=0,
@@ -488,8 +492,8 @@ tour_run <- data.frame(p = rep(prob.event, n/10),
                        event=0)
 winC1 <- 0
 winC2 <- 0
-sigma_C1 <- (p1-1)*0.05
-sigma_C2 <- (p2)*0.05
+sigma_C1 <- (j-1)*0.05
+sigma_C2 <- (k)*0.05
 for (i in (1:N)) {
   tour_run$lower.limitC1 <- ifelse(tour_run$p - sigma_C1 < 0, 0, tour_run$p - sigma_C1)
   tour_run$upper.limitC1 <- ifelse(tour_run$p + sigma_C1 > 1, 1, tour_run$p + sigma_C1)
@@ -520,22 +524,28 @@ for (i in (1:N)) {
   }
   ifelse(total_score_contest$Contestant1[i] < total_score_contest$Contestant2[i], winC1 <- winC1+1, winC2 <- winC2+1)
 }
-percentage_win_C1[p1,p2] <- winC1/N
+percentage_win_C1[j,k] <- format(round(100*winC1/N,2),nsmall=2)
+  }
+}
+for (i in (2:6)) {
+  for (j in (1:(i-1))) {
+    percentage_win_C1[i,j] <- ""
   }
 }
 @
-
+\smallskip
 <<>>=
 percentage_win_C1  
 @
+\medskip
+The first column of Table ''Percentage\_win\_C1" shows the $\sigma$-factor for contestant 1. The first row shows the $\sigma$-factor for contestant 2. When the first contestant has $\sigma=0.05$ and the second contestant has $\sigma=0.2$ the table shows that contestant 1 will win 97.12\% of the tournaments. This table agrees with Figure 2 in prof. Aldous's paper\sidenote[][-1cm]{The differences are probably due to the number of tournaments N and the choice of the seed for the random number generator}.
 
-This table agrees with Figure 2 in prof. Aldous's paper\sidenote{The differences are probably due to the number of tournaments N and the choice of the seed for the random number generator}.
 
 \section{Tournaments with many contestants}
 
 \subsection{Groups containing Perfect Forecasters}
 
-When we have many contestants we expect the better forecaster to win more individual tournaments then the worse forecasters. Let us start with 10 forecasters, ranged from better to worse. This qualitative ranging is done by assigning each forecaster a value for $\sigma$. In the first simulations we will let $\sigma$ take values from $0$ to $0.3$.The best forecaster (number 1) is the \emph{Perfect Forecaster} which means she has a $\sigma=0$. The worst forecaster (number 10) has a $\sigma=0.3$. Intermediat forecasters have intermediate values of $\sigma$. The result is given in Figure~\ref{fig:ten}.
+When we have many contestants we expect the Realistic Forecaster to win more individual tournaments then the worse forecasters. Let us start with 10 forecasters, ranged from better to worse. This qualitative ranging is done by assigning each forecaster a value for $\sigma$. In the first simulations we will let $\sigma$ take values from $0$ to $0.3$.The best forecaster (number 1) is the \emph{Perfect Forecaster} which means she has a $\sigma=0$. The worst forecaster (number 10) has a $\sigma=0.3$. Intermediat forecasters have intermediate values of $\sigma$. The result is given in Figure~\ref{fig:ten}.
 % 10 contestants
 <<label=ten,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
@@ -760,7 +770,7 @@ ggplot(data=endscore, aes(x=contestant, y=som)) +
 \chapter{Another model for the forecaster}
 
 \section{Distribution of the total scores for different contestants}
-A more gentle model for the \emph{Better Forecaster} is one that allows her to pick a random number in the range $[p_{i}-\sigma,p_{i}+\sigma]$ instead of having to pick either $(p_{i}-\sigma)$ or $(p_{i}+\sigma)$. In (Figure~\ref{fig:FiveTRJ}) we can see that the total scores of these forecasters, with different abilities (different values of $\sigma$) are better  than those in Figure~\ref{fig:FiveContestans}. This also means that the overlap between contestants increases and worse contestants are more likely to win.
+A more gentle model for the \emph{Realistic Forecaster} is one that allows her to pick a random number in the range $[p_{i}-\sigma,p_{i}+\sigma]$ instead of having to pick either $(p_{i}-\sigma)$ or $(p_{i}+\sigma)$. In (Figure~\ref{fig:FiveTRJ}) we can see that the total scores of these forecasters, with different abilities (different values of $\sigma$) are better  than those in Figure~\ref{fig:FiveContestans}. This also means that the overlap between contestants increases and worse contestants are more likely to win.
 
 <<echo=FALSE>>=
 Aldous=FALSE #Pick model TRJ
