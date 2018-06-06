@@ -84,7 +84,7 @@ JT.theme <- theme(panel.border = element_rect(fill = NA, colour = "gray10"),
 % Functions
 
 \frontmatter
-\chapter*{Notes on "A Prediction Tournament Paradox" $\quad$ $\quad$ David J. Aldous}
+\chapter*{Notes on David J. Aldous's paper: \qquad \qquad \qquad \qquad \qquad \quad" A Prediction Tournament Paradox}
 \chaptermark*{Jan Trommelmans}
 
 \chapter*{Introduction}
@@ -241,7 +241,7 @@ The average score of the \emph{Perfect Forecaster} is fixed once we have chosen 
 
 <<echo=FALSE>>=
 Aldous <- TRUE
-N <- 100 # number of tournaments
+N <- 2000 # number of tournaments
 n <- 100 # number of questions per tournament
 prob.event <- seq(0.05, 0.95, by=0.1) # sequence of true probabilities
 @
@@ -469,7 +469,10 @@ ggplot() +
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{marginfigure}
 
-\chapter{Tournaments with multiple contestants}
+\chapter{Winning tournaments}
+
+In his paper prof. Aldous looks at the number of tournaments that contestants with different abilities (different values of $\sigma$) win. It's all about winning: only first place counts.
+
 \section{Tournaments with two contestants}
 When comparing two contestants, we could look at their \emph{average total score} over many tournaments: the Contestant with the lowest average score is the better one. However, when we look at only one tournament, it could be that the (worse) Contestant with the higher average score still performs better than the (better) Contestant with the lower average score. This is of course due to the spread of the scores \emph{around} the average value. By luck, Contestant 2 could be to the left of her average, while Contestant 1 could be to the right of her average. This seems in accordance with our intuition: in a game where both skill and chance play a role, the better player wins most of the time, but not always. As the difference of ability increases, the probability for a win for the better player increases.
 
@@ -545,7 +548,7 @@ The first column of Table ''Percentage\_win\_C1" shows the $\sigma$-factor for c
 
 \subsection{Groups containing Perfect Forecasters}
 
-When we have many contestants we expect the Realistic Forecaster to win more individual tournaments then the worse forecasters. Let us start with 10 forecasters, ranged from better to worse. This qualitative ranging is done by assigning each forecaster a value for $\sigma$. In the first simulations we will let $\sigma$ take values from $0$ to $0.3$.The best forecaster (number 1) is the \emph{Perfect Forecaster} which means she has a $\sigma=0$. The worst forecaster (number 10) has a $\sigma=0.3$. Intermediat forecasters have intermediate values of $\sigma$. The result is given in Figure~\ref{fig:ten}.
+When we have many contestants we expect the Realistic Forecaster to win more individual tournaments then the worse forecasters. Let us start with 10 forecasters, ranged from better to worse. This qualitative ranging is done by assigning to each forecaster a value for $\sigma$. In the first simulations we will let $\sigma$ take values from $0$ to $0.3$.The best forecaster (number 1) is the \emph{Perfect Forecaster} which means she has a $\sigma=0$. The worst forecaster (number 10) has a $\sigma=0.3$. Intermediat forecasters have intermediate values of $\sigma$. The result is given in Figure~\ref{fig:ten}. All seems as we would expect it: the best forecaster wins the most tournaments.
 % 10 contestants
 <<label=ten,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
@@ -583,22 +586,20 @@ ggplot(data=endscore, aes(x=contestant, y=som)) +
   geom_bar(stat="identity") +
   xlim(0,nC) +
   labs(title = "Tournament wins for each contestant", 
-       subtitle = paste(nC,"forecasters"),
+       subtitle = paste(nC,"forecasters","taking part in",N,"tournaments"),
        x = "contestant", 
        y = paste("number of wins in", N,"tournaments")) +
   JT.theme
 @
 
-\begin{marginfigure}[0cm]
+\begin{marginfigure}[-2cm]
 \centering
 \includegraphics[width=200pt, height=200pt]{Tour-ten}
 \caption{10 contestants}
 \label{fig:ten}
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{marginfigure}
-
-All seems as we would expect it: the best forecaster wins the most tournaments.
-
+\medskip
 However: things change when the number of forecasters increases. Figure~\ref{fig:twenty} already shows another picture when we have twenty forecasters.
 
 % 20 contestants
@@ -638,7 +639,7 @@ ggplot(data=endscore, aes(x=contestant, y=som)) +
   geom_bar(stat="identity") +
   xlim(0,nC) +
   labs(title = "Tournament wins for each contestant", 
-       subtitle = paste(nC,"forecasters"),
+       subtitle = paste(nC,"forecasters","taking part in",N,"tournaments"),
        x = "contestant", 
        y = paste("number of wins in", N,"tournaments")) +
   JT.theme
@@ -651,12 +652,12 @@ ggplot(data=endscore, aes(x=contestant, y=som)) +
 \label{fig:twenty}
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{marginfigure}
-
-When we increase the number of contestants further to 50 (Figure~\ref{fig:fifty}) the \emph{Paradox} reveals itself: the better forecasters are winning less and less tournaments! As prof. Aldous explains, this should not surprise us. The reason is that in these simulations we keep the total range for $\sigma$ constant between $0$ and $0.3$. The difference in the value of $\sigma$ of two sequential contestants is:
+\medskip
+When we increase the number of contestants further to 50 (Figure~\ref{fig:fifty}) the \emph{Paradox} becomes visible: the better forecasters are winning less and less tournaments! As prof. Aldous explains, this should not surprise us. The reason is that in these simulations we keep the total range for $\sigma$ constant between $0$ and $0.3$. The difference in the value of $\sigma$ between two sequential contestants is:
 \begin{equation}
 \delta_{\sigma}=\frac{(\sigma_{max}-\sigma_{min})}{(n_{C}-1)} \quad with \quad n_{C}=number \quad of \quad contestants
 \end{equation}
-
+As the number of contestants $n_{C}$ rises, the difference $\delta_{\sigma}$ will become smaller and smaller. With $\sigma_{max}=0.3$ and $\sigma_{min}=0$ the difference between two sequential contestants will be \Sexpr{round(0.3/9,3)} when there are 10 contestants, but only \Sexpr{round(0.3/49,3)} when there are 50 contestants. In the latter case the level of ability will be almost the same for two sequential contestants. When more and more contestants are added (up to 300 in prof. Aldous's paper), the distinction between two sequential contestants becomes almost indistinguishable.
 % 50 contestants
 <<label=fifty,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
@@ -694,7 +695,7 @@ ggplot(data=endscore, aes(x=contestant, y=som)) +
   geom_bar(stat="identity") +
   xlim(0,nC) +
   labs(title = "Tournament wins for each contestant", 
-       subtitle = paste(nC,"forecasters"),
+       subtitle = paste(nC,"forecasters","taking part in",N,"tournaments"),
        x = "contestant", 
        y = paste("number of wins in", N,"tournaments")) +
   JT.theme
@@ -708,13 +709,35 @@ ggplot(data=endscore, aes(x=contestant, y=som)) +
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{marginfigure}
 
-With $\sigma_{max}=0.3$ and $\sigma_{min}=0$ the difference between two sequential contestants will be \Sexpr{round(0.3/9,3)} when there are 10 contestants, but only \Sexpr{round(0.3/49,3)} when there are 50 contestants. In the latter case the level of ability will be almost the same for two sequential contestants. When more and more contestants are added (up to 300 in prof. Aldous's paper), the distinction between two sequential contestants becomes almost indistinguishable.
+\subsection{What is happening?}
+The very good contestants have a very small value of $\sigma$ which means they will act like the \emph{Perfect Forecaster} and pick $q_{i}=p_{i}$. However, as we have seen in \ref{subsec:expiry}, the important thing is that the score is not based on the squared difference $(p_{i}-q_{i})^{2}$ but on the squared difference $(result_{i}-q_{i})^{2}$, where $result_{i}$ has the value $1$ or $0$ depending on the occurence of event $i$ (or not). The \emph{Perfect Forecaster} gets into trouble for those questions with a very low probability or a very high probability.
 
-\subsection{Explanation}
-The very good contestants have a very small value of $\sigma$ which means they will act like the \emph{Perfect Forecaster} and pick $q_{i}=p_{i}$. However, as we have seen in \ref{subsec:expiry}, the important thing is that the score is not based on the difference $(q_{i}-p_{i})$ but on the difference $(result_{i}-p_{i})$, where $result_{i}$ has the value $0$ or $1$ depending on establishing that event $i$ took place (or not). The very good forecasters will get a score of $(0-p_{i})^2$ or $(1-p_{i})^2$ for this question. A contestant who has a $\sigma=0.1$ will get a score of $(\pm 0.1-p_{i})^2$ or $(1 \pm 0.1-p_{i})^2$. Usually this will be worse than the former. However, with a lot of contestants, a few with a $\sigma$ close to $0.1$ will get lucky and beat the better forecasters. This effect should decrease when we do not have \emph{Perfect Forecasters} in our group, or in other words that all forecasters are flawed and have a $\sigma>0$.
+Let us take a question with a very low probability $p_{i}=0.05$. We get the following situation:
+\begin{itemize}
+  \item the \emph{Perfect Forecaster} chooses $q_{i}=p_{i}=0.05$ and her score will be
+    \begin{enumerate}
+      \item if the event does NOT occur: $score_{i}=(0-q_{i})^2=q_{i}^{2}=0.05^{2}=0.0025$
+      \item if the event occurs: $score_{i}=(1-q_{i})^2=(1-0.05)^2=0.95^{2}=0.9025$
+    \end{enumerate}
+  \item a \emph{Realistic Forecaster} with $\sigma=0.1$ chooses either $q_{i}=(p_{i}-\sigma)=-0.05=0$ (50\% chance) or $q_{i}=(p_{i}+\sigma)=0.15$ (50\% chance)\sidenote{negative probabilities are impossible, so $q_{i}=-0.05$ is brought to $q_{i}=0$}. Her possible scores are:
+    \begin{enumerate}
+      \item if the event does NOT occur: $score_{i}=(0-q_{i})^2=0^{2}=0$ (50\%) or $score_{i}=(0-0.15)^2=0.15^{2}=0.0225$ (50\%)
+      \item if the event occurs: $score_{i}=(1-q_{i})^2=1^{2}=1$ (50\%) or $score_{i}=(1-0.15)^2=0.85^{2}=0.7225$ (50\%)
+    \end{enumerate}
+\end{itemize}
+
+On average the \emph{Perfect Forecaster} will have a score of $0.0025*0.95 + 0.9025*0.05=0.068875$ on a question with probability $p_{i}=0.05$. The \emph{Realistic Forecaster} with a $\sigma=0.1$ will get an average score of $\frac{0+0.0225}{2}*0.95 + \frac{1+0.7225}{2}*0.05=0.05375$, which is \emph{lower}!
+
+When we redo this calculation for a \emph{Realistic Forecaster} with a $\sigma=0.3$ the average score of the \emph{Perfect Forecaster} on this question will remain the same ($0.068875$), but the average score of the \emph{Realistic Forecaster} will become $0.09375$, which is higher and worse.
+
+This means that the choice of the model for the \emph{Perfect Forecaster} that she always picks $q_{i}=p_{i}$ give the \emph{Perfect Forecaster} a disadvantage for questions with low or high probability. The Paradox is the consequence of this choice.
+
+The simple remedy for this, and one that is intuitively sounder, is to avoid these \emph{Perfect Forecasters} and to work only with \emph{Flawed Forecasters} which all have a $\sigma \neq 0$.
 
 \subsection{Groups where all contestants are flawed}
-The model is now that $\sigma_{min} > 0$. Prof. Aldous puts $\sigma_{min}=0.15$ and keeps the range between the minimum and maximum value of $\sigma$ equal to $0.3$. The results can be seen in Figure~\ref{fig:fiftyflawed}: the better players start winning the most tournaments. The ''chance" element which occurs at the moment that the event materialises (or not) is however still strong, which means that poorer forecasters still win a considerable number of tournaments.
+Prof. Aldous's model is now that $\sigma_{min} > 0$. He puts $\sigma_{min}=0.15$ and keeps the range between the minimum and maximum value of $\sigma$ equal to $0.3$. This means that the maximum value is $\sigma_{max}=0.45$. The results can be seen in Figure~\ref{fig:fiftyflawed}: the better players start winning the most tournaments. The ''chance" element which occurs at the moment that the event materialises (or not) is however still strong, which means that poorer forecasters still win a considerable number of tournaments.
+
+So, to all forecasters who have, or will, win tournaments: my congratulations. But do not forget that you enjoyed a good deal of luck, and you are welcome to it!
 
 % 50 flawed contestants
 <<label=fiftyflawed,fig=TRUE,include=FALSE, echo=FALSE>>=
@@ -753,13 +776,13 @@ ggplot(data=endscore, aes(x=contestant, y=som)) +
   geom_bar(stat="identity") +
   xlim(0,nC) +
   labs(title = "Tournament wins for each contestant", 
-       subtitle = paste(nC,"forecasters"),
+       subtitle = paste(nC,"forecasters","taking part in",N,"tournaments"),
        x = "contestant", 
        y = paste("number of wins in", N,"tournaments")) +
   JT.theme
 @
 
-\begin{marginfigure}
+\begin{marginfigure}[-5cm]
 \centering
 \includegraphics[width=200pt, height=200pt]{Tour-fiftyflawed}
 \caption{50 flawed contestants}
@@ -770,7 +793,7 @@ ggplot(data=endscore, aes(x=contestant, y=som)) +
 \chapter{Another model for the forecaster}
 
 \section{Distribution of the total scores for different contestants}
-A more gentle model for the \emph{Realistic Forecaster} is one that allows her to pick a random number in the range $[p_{i}-\sigma,p_{i}+\sigma]$ instead of having to pick either $(p_{i}-\sigma)$ or $(p_{i}+\sigma)$. In (Figure~\ref{fig:FiveTRJ}) we can see that the total scores of these forecasters, with different abilities (different values of $\sigma$) are better  than those in Figure~\ref{fig:FiveContestans}. This also means that the overlap between contestants increases and worse contestants are more likely to win.
+A more gentle model for the \emph{Realistic Forecaster} is one that allows her to pick a random number in the range $[p_{i}-\sigma,p_{i}+\sigma]$ instead of having to pick either $(p_{i}-\sigma)$ or $(p_{i}+\sigma)$. In Figure~\ref{fig:FiveTRJ} we can see that the total scores of these forecasters, with different abilities (different values of $\sigma$) are better  than those in Figure~\ref{fig:FiveContestants}. This also means that the overlap between contestants increases and worse contestants are more likely to win.
 
 <<echo=FALSE>>=
 Aldous=FALSE #Pick model TRJ
@@ -820,8 +843,8 @@ ggplot() +
   geom_density(data=t5, aes(x = som, y = ..density..), color="chocolate1", size=0.5) +
   annotate("text", x= 16.75, y= 0.22, label="sigma=0", color="black") +
   annotate("text", x= 20.5, y= 0.20, label="0.10", color="blue") +
-  annotate("text", x= 21, y= 0.19, label="0.25", color="green") +
-  annotate("text", x= 24, y= 0.185, label="0.50", color="red") +
+  annotate("text", x= 21, y= 0.185, label="0.25", color="green") +
+  annotate("text", x= 24, y= 0.16, label="0.50", color="red") +
   annotate("text", x= 30, y= 0.15, label="0.75", color="chocolate1") +
   xlim(0,60) +
   labs(title = paste("Distribution of scores for", N, "tournaments"), 
@@ -841,7 +864,7 @@ ggplot() +
 
 \section{Tournaments with 50 competitors}
 \subsection{Groups with Perfect Forecasters}
-As there is more overlap in this model, we expect that the situation for very good forecasters (close to the \emph{Perfect Forecaster}) will be even worse. And this is the case (Figure~\ref{fig:fiftyTRJ}). Tournemant wins go more and more to average players.
+As there is more overlap in this model, we expect that the situation for very good forecasters (close to the \emph{Perfect Forecaster}) will be even worse. And this is the case (Figure~\ref{fig:fiftyTRJ}). Tournament wins go more and more to average players.
 
 % 50 contestants
 <<label=fiftyTRJ,fig=TRUE,include=FALSE, echo=FALSE>>=
@@ -880,16 +903,16 @@ ggplot(data=endscore, aes(x=contestant, y=som)) +
   geom_bar(stat="identity") +
   xlim(0,nC) +
   labs(title = "Tournament wins for each contestant\n uniform model in [p-sigma,p+sigma]", 
-       subtitle = paste(nC,"forecasters"),
+       subtitle = paste(nC,"forecasters","taking part in",N,"tournaments"),
        x = "contestant", 
        y = paste("number of wins in", N,"tournaments")) +
   JT.theme
 @
 
-\begin{marginfigure}
+\begin{marginfigure}[-2cm]
 \centering
 \includegraphics[width=200pt, height=200pt]{Tour-fiftyTRJ}
-\caption{50 contestants - model TRJ}
+\caption{50 contestants}
 \label{fig:fiftyTRJ}
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{marginfigure}
@@ -935,7 +958,7 @@ ggplot(data=endscore, aes(x=contestant, y=som)) +
   geom_bar(stat="identity") +
   xlim(0,nC) +
   labs(title = "Tournament wins for each contestant\n uniform model in [p-sigma,p+sigma]", 
-       subtitle = paste(nC,"forecasters"),
+       subtitle = paste(nC,"forecasters","taking part in",N,"tournaments"),
        x = "contestant", 
        y = paste("number of wins in", N,"tournaments")) +
   JT.theme
@@ -944,7 +967,7 @@ ggplot(data=endscore, aes(x=contestant, y=som)) +
 \begin{marginfigure}
 \centering
 \includegraphics[width=200pt, height=200pt]{Tour-fiftyflawedTRJ}
-\caption{50 flawed contestants - model TRJ}
+\caption{50 flawed contestants}
 \label{fig:fiftyflawedTRJ}
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{marginfigure}
