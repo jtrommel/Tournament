@@ -192,8 +192,8 @@ score_{total}=\sum_{i=1}^{i=n}score_{i}=\sum_{i=1}^{i=n}\left( result_{i} - q_{i
 
 The same forecaster, giving the same predictions based on her know-ledge about questions with the same probabilities, will get a different score because there is an uncontrollable factor ''chance" that makes the event happen on one occasion but not on another. From this it follows that if we run 1000 tournaments with 100 questions with the same actual probabilities ($p_{i}$), and the forecaster gives the same estimate ($q_{i}$) for the probability that the event will occur, we will get 1000 slightly different total scores. In short: the total score will show some variation around an average value of the total score.
 
-\section{Average (or Expected) value of the score}
-
+\section{Expected value and variance of the total score}
+\subsection{Expected value of the total score}
 When we have a variable that depends on chance (such as the total score) it can have different values with different probabilities. In our case the score on question $i$ can have two values:
 \begin{equation}
   \begin{split}
@@ -212,6 +212,7 @@ The probablities that the event occurs or not are:
 
 You can find the \emph{Expected Value} of the score by multiplying the possible scores with their probability and adding the results:
 \begin{equation}
+\label{eq:expscorei}
   \begin{split}
     E(score_{i})&=(1-q_{i})^2(p_{i}) + (q_{i})^2(1-p_{i}) \\
     &= (p_{i} - 2p_{i}q_{i} + p_{i}q_{i}^2) + (q_{i}^{2}-p_{i}q_{i}^{2}) \\
@@ -226,18 +227,42 @@ E(score_{total})=E(\sum_{i=1}^{i=n}score_{i})=\sum_{i=1}^{i=n}p_{i}(1-p_{i}) + \
 \label{eq:meantotal}
 \end{equation}
 
+\subsection{Variance of the total score}
+
+The variance of the score on question $i$ is the average value of the square of the difference between the score on question $i$  and the expected score on question $i$ (which is given by equation \ref{eq:expscorei}):
+\begin{equation}
+\label{eq:varscorei}
+  \begin{split}
+    var(score_{i})&=E\left( (score_{i} - E(score_{i}))^2  \right) \\
+    &= \left[(1-q_{i})^{2}-p_{i}(1-p_{i}) - (q_{i}-p_{i})^{2}  \right]^{2}p_{i} +  \left[q_{i}^{2}-p_{i}(1-p_{i}) - (q_{i}p_{i})^{2}  \right]^{2}(1-p_{i})\\
+    &= \left[1 - 2q_{i} + q_{i}^{2} -p_{i}+ p_{i}^{2} -q_{i}^{2} + 2q_{i}p_{i} - p_{i}^{2}  \right]^{2}p_{i} + \left[ q_{i}^{2} - p_{i} + p_{i}^{2} - q_{i}^{2} +2q_{i}p_{i}-p_{i}^{2} \right]^2(1-p_{i}) \\
+    &= \left[(1-2q_{i}) - p_{i}(1-2q_{i}) \right]^{2}p_{i} + \left[-p_{i}(1-2q_{i})  \right]^{2}(1-p_{i}) \\
+    &= (1-2q_{i})^{2}p_{i}- p_{i}^{2}(1-2q_{i})^{2} \\
+    &= p_{i}(1-p_{i})(1-2q_{i})^{2}
+  \end{split}
+\end{equation}
+
+The variance of the total score is the sum of all the variances of the question scores:
+\begin{equation}
+var(score_{total})=\sum_{i=1}^{i=n}var(score_{i}))=\sum_{i=1}^{i=n}p_{i}(1-p_{i})(1-2q_{i})^{2}
+\label{eq:vartotal}
+\end{equation}
+
 \chapter{A tale of three forecasters}
 
 We are going to look at the scores of three different forecasters. Each forecaster will take part in N tournaments\sidenote{N can be very large e.g. 10.000. It's just the computer doing all the work}. Each tournament has 100 question: 10 questions about events with a probability of occurence $p=0.05$, 10 questions with probability of occurence $p=0.15$, and so on in steps of $0.10$, until the last set of 10 questions about events with probability of occurence $p=0.95$.
 
 \section{The Perfect Forecaster}
-This forecaster is faultless: for every question she ''knows" the exact probability. So for every question her choice $q_{i}$ of the probability of occurence ot the event is exactly equal to $p_{i}$. We can calculate the expected value of the total score of the Perfect Forecaster using Equation~\ref{eq:meantotal}. The second term in this equation is 0 because the Perfect Forecaster always chooses $q_{i}=p_{i}$:
+This forecaster is faultless: for every question she ''knows" the exact probability. So for every question her choice $q_{i}$ of the probability of occurence ot the event is exactly equal to $p_{i}$. 
+
+We can calculate the expected value and the variance of the total score of the Perfect Forecaster using Equation~\ref{eq:meantotal}. The second term in the equation for the expected value is 0 because the Perfect Forecaster always chooses $q_{i}=p_{i}$:
 \begin{equation}
 \label{eq:perfect}
-E(S_{perfect})=\sum_{i=1}^{i=n}p_{i}(1-p_{i})
+  \begin{split}
+    E(S_{perfect})&=\sum_{i=1}^{i=n}p_{i}(1-p_{i}) \\
+    var(S_{perfect})&=\sum_{i=1}^{i=n}p_{i}(1-p_{i})(1-2p_{i})^{2}
+  \end{split}
 \end{equation}
-
-The average score of the \emph{Perfect Forecaster} is fixed once we have chosen the values of $p_{i}$ and the number of questions $n$. In this example the average perfect score is $16.75$. As explained in \ref{subsec:expiry} the end scores for the different tournaments will lie around this average score (Figure~\ref{fig:Perfect}).
 
 <<echo=FALSE>>=
 Aldous <- TRUE
@@ -260,11 +285,16 @@ for (i in (1:N)) {
   total_score_perfect$result[i] <- sum(tour_run$question.score)
 }
 perfect_score <- sum(tour_run$p*(1-tour_run$p))
+var.perfect <- sum(tour_run$p*(1-tour_run$p)*(1-2*tour_run$p)^2)
+std.perfect <- sqrt(var.perfect)
+norm.z <- data.frame(x=seq(10,30,by=0.1),y =0)
+norm.z$y <- dnorm(norm.z$x,perfect_score,std.perfect)
 gem.result.perfect <- mean(total_score_perfect$result)
 ggplot() +
   geom_histogram(data=total_score_perfect, aes(x = result, y = ..density..), 
                  binwidth=1, fill="lightblue", color="grey60", size=0.2) +
   geom_density(data=total_score_perfect, aes(x = result, y = ..density..)) +
+  geom_line(data=norm.z, aes(x=x,y=y), color="red", size=1) +
   geom_vline(xintercept=perfect_score, color="red", size=0.8) +
   xlim(0, 50) +
   labs(title = paste("Distribution of total scores for", N, "tournaments"), 
@@ -282,17 +312,22 @@ ggplot() +
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{marginfigure}
 
+The average score of the \emph{Perfect Forecaster} is fixed once we have chosen the values of $p_{i}$ and the number of questions $n$. In this example the average perfect score is \Sexpr{round(perfect_score,2)}. The variance of the total scores of the \emph{Perfect Forecaster} is \Sexpr{round(var.perfect)}. From the variance we find the standard deviation (it's the square) and it is equal to \Sexpr{round(std.perfect,2)}. Theory predict that the total scores will be normally distibuted with parameters $\mu=$\Sexpr{round(perfect_score,2)} and $\sigma=$\Sexpr{round(std.perfect,2)}. In Figure~\ref{fig:Perfect} the red curve shows the normal distribution with these parameters. It fits the simulation quite well.
+
 \section{The Ignorant Forecaster}
 
 The \emph{Ignorant Forecaster} has no insight at all in the matter and chooses for each question at random\sidenote{random uniform distribution within [0,1]} a probability $q_{i}$ in the range [0,1].
 
-Her average total score is given by Equation~\ref{eq:meantotal}:
+Her average total score is given by Equation~\ref{eq:meantotal} and the variance by Equation~\ref{eq:vartotal}:
 \begin{equation}
 \label{eq:ignorant}
-E(S_{ignorant})=\sum_{i=1}^{i=n}p_{i}(1-p_{i}) + \sum_{i=1}^{i=n}(q_{i}-p_{i})^{2} = \sum_{i=1}^{i=n}p_{i}(1-p_{i}) + n\sigma_{ignorant}^2
+  \begin{split}
+E(S_{ignorant})&=\sum_{i=1}^{i=n}p_{i}(1-p_{i}) + \sum_{i=1}^{i=n}(q_{i}-p_{i})^{2} = E(S_{perfect}) + \sum_{i=1}^{i=n}(q_{i}-p_{i})^{2} \\
+var(S_{ignorant})&=\sum_{i=1}^{i=n}p_{i}(1-p_{i})(1-2q_{i})^{2}
+  \end{split}
 \end{equation}
 
-Because the second term is always positive, the average total score of the Ignorant Forecaster will always be higher that the average score of the Perfect Forecaster.
+Because the second term is always positive in the first equation, the average total score of the Ignorant Forecaster will always be higher that the average score of the Perfect Forecaster\sidenote{Both equations depend on the values of $q_{i}$, which means that when we rerun the simulations, we will get other values of $q_{i}$ and therefore other values for the expected value of the total score and for the variance of the total score}.
 
 <<label=Ignorant,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
@@ -308,11 +343,16 @@ for (i in (1:N)) {
   total_score_ignorant$result[i] <- sum(tour_run$question.score)
 }
 gem.result.ignorant <- mean(total_score_ignorant$result)
-ggplot(data=total_score_ignorant, aes(x = result, y = ..density..)) +
+mu.ignorant <- sum(tour_run$p*(1-tour_run$p)) + sum((tour_run$q-tour_run$p)^2)
+std.ignorant <- sqrt(sum(tour_run$p*(1-tour_run$p)*(1-2*tour_run$q)^2))
+norm.z <- data.frame(x=seq(20,50,by=0.1), y =0)
+norm.z$y <- dnorm(norm.z$x,mu.ignorant,std.ignorant)
+ggplot() +
   geom_histogram(data=total_score_ignorant, aes(x = result, y = ..density..), 
                  binwidth=1, fill="lightblue", color="grey60", size=0.2) +
   geom_density(data=total_score_ignorant, aes(x = result, y = ..density..)) +
   geom_density(data=total_score_perfect, aes(x = result, y = ..density..), color="red", linetype=2, size=0.5 ) +
+  geom_line(data=norm.z, aes(x=x,y=y), color="red", size=1) +
   geom_vline(xintercept=perfect_score, color="red", size=0.5) +
   geom_vline(xintercept=gem.result.ignorant, color="blue", size=0.8) +
   annotate("text", x= perfect_score, y= 0.04, label="Perfect", color="red") +
