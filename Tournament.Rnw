@@ -266,7 +266,7 @@ We can calculate the expected value and the variance of the total score of the P
 
 <<echo=FALSE>>=
 Aldous <- TRUE
-N <- 2000 # number of tournaments
+N <- 1000 # number of tournaments
 n <- 100 # number of questions per tournament
 prob.event <- seq(0.05, 0.95, by=0.1) # sequence of true probabilities
 @
@@ -284,18 +284,17 @@ for (i in (1:N)) {
   tour_run$question.score <- (tour_run$event - tour_run$q)^2
   total_score_perfect$result[i] <- sum(tour_run$question.score)
 }
-perfect_score <- sum(tour_run$p*(1-tour_run$p))
+mu.perfect <- sum(tour_run$p*(1-tour_run$p))
 var.perfect <- sum(tour_run$p*(1-tour_run$p)*(1-2*tour_run$p)^2)
 std.perfect <- sqrt(var.perfect)
-norm.z <- data.frame(x=seq(10,30,by=0.1),y =0)
-norm.z$y <- dnorm(norm.z$x,perfect_score,std.perfect)
-gem.result.perfect <- mean(total_score_perfect$result)
+norm.perfect <- data.frame(x=seq(10,30,by=0.1),y =0)
+norm.perfect$y <- dnorm(norm.perfect$x,mu.perfect,std.perfect)
 ggplot() +
   geom_histogram(data=total_score_perfect, aes(x = result, y = ..density..), 
                  binwidth=1, fill="lightblue", color="grey60", size=0.2) +
   geom_density(data=total_score_perfect, aes(x = result, y = ..density..)) +
-  geom_line(data=norm.z, aes(x=x,y=y), color="red", size=1) +
-  geom_vline(xintercept=perfect_score, color="red", size=0.8) +
+  geom_line(data=norm.perfect, aes(x=x,y=y), color="red", size=1) +
+  geom_vline(xintercept=mu.perfect, color="red", size=0.8) +
   xlim(0, 50) +
   labs(title = paste("Distribution of total scores for", N, "tournaments"), 
        subtitle = "Perfect Forecaster",
@@ -312,7 +311,7 @@ ggplot() +
 \setfloatalignment{b}% forces caption to be bottom-aligned
 \end{marginfigure}
 
-The average score of the \emph{Perfect Forecaster} is fixed once we have chosen the values of $p_{i}$ and the number of questions $n$. In this example the average perfect score is \Sexpr{round(perfect_score,2)}. The variance of the total scores of the \emph{Perfect Forecaster} is \Sexpr{round(var.perfect)}. From the variance we find the standard deviation (it's the square) and it is equal to \Sexpr{round(std.perfect,2)}. Theory predict that the total scores will be normally distibuted with parameters $\mu=$\Sexpr{round(perfect_score,2)} and $\sigma=$\Sexpr{round(std.perfect,2)}. In Figure~\ref{fig:Perfect} the red curve shows the normal distribution with these parameters. It fits the simulation quite well.
+The average score of the \emph{Perfect Forecaster} is fixed once we have chosen the values of $p_{i}$ and the number of questions $n$. In this example the average perfect score is \Sexpr{round(mu.perfect,2)}. The variance of the total scores of the \emph{Perfect Forecaster} is \Sexpr{round(var.perfect)}. From the variance we find the standard deviation (it's the square) and it is equal to \Sexpr{round(std.perfect,2)}. Theory predict that the total scores will be normally distibuted with parameters $\mu=$\Sexpr{round(mu.perfect,2)} and $\sigma=$\Sexpr{round(std.perfect,2)}. In Figure~\ref{fig:Perfect} the red curve shows the normal distribution with these parameters. It fits the simulation quite well.
 
 \section{The Ignorant Forecaster}
 
@@ -332,7 +331,7 @@ Because the second term is always positive in the first equation, the average to
 <<label=Ignorant,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
 # set up data frame with known probabilities p and randomly chosen probabilities q in range [0,1]
-total_score_ignorant <- data.frame(result=rep(0,N))
+total_score_ignorant <- data.frame(result=rep(0,N), mu=0, var=0)
 # defining the real probabilities for each question: 10 questions with prob=0.05; 10 with prob=0.15 and so on till prob=0.95
 tour_run <- data.frame(p = rep(prob.event, n/10), q = 0, event=0)
 # simulating N tournaments
@@ -341,22 +340,25 @@ for (i in (1:N)) {
   tour_run$event <- rbinom(n,1,tour_run$p)
   tour_run$question.score <- (tour_run$event - tour_run$q)^2
   total_score_ignorant$result[i] <- sum(tour_run$question.score)
+  total_score_ignorant$mu[i] <- sum(tour_run$p*(1-tour_run$p)) + sum((tour_run$q-tour_run$p)^2)
+  total_score_ignorant$var[i] <- sum(tour_run$p*(1-tour_run$p)*(1-2*tour_run$q)^2)
 }
 gem.result.ignorant <- mean(total_score_ignorant$result)
-mu.ignorant <- sum(tour_run$p*(1-tour_run$p)) + sum((tour_run$q-tour_run$p)^2)
-std.ignorant <- sqrt(sum(tour_run$p*(1-tour_run$p)*(1-2*tour_run$q)^2))
-norm.z <- data.frame(x=seq(20,50,by=0.1), y =0)
-norm.z$y <- dnorm(norm.z$x,mu.ignorant,std.ignorant)
+mu.ignorant <- mean(total_score_ignorant$mu)
+# std.ignorant <- sqrt(mean(total_score_ignorant$var)) The theoretical value
+std.ignorant <- sd(total_score_ignorant$result) # The real std: much larger
+norm.ignorant <- data.frame(x=seq(20,50,by=0.1), y =0)
+norm.ignorant$y <- dnorm(norm.ignorant$x,mu.ignorant,std.ignorant)
 ggplot() +
   geom_histogram(data=total_score_ignorant, aes(x = result, y = ..density..), 
                  binwidth=1, fill="lightblue", color="grey60", size=0.2) +
   geom_density(data=total_score_ignorant, aes(x = result, y = ..density..)) +
   geom_density(data=total_score_perfect, aes(x = result, y = ..density..), color="red", linetype=2, size=0.5 ) +
-  geom_line(data=norm.z, aes(x=x,y=y), color="red", size=1) +
-  geom_vline(xintercept=perfect_score, color="red", size=0.5) +
+  geom_line(data=norm.ignorant, aes(x=x,y=y), color="blue", size=1) +
+  geom_vline(xintercept=mu.perfect, color="red", size=0.5) +
   geom_vline(xintercept=gem.result.ignorant, color="blue", size=0.8) +
-  annotate("text", x= perfect_score, y= 0.04, label="Perfect", color="red") +
-  annotate("text", x= perfect_score, y= 0.03, label="Forecaster", color="red") +
+  annotate("text", x= mu.perfect, y= 0.04, label="Perfect", color="red") +
+  annotate("text", x= mu.perfect, y= 0.03, label="Forecaster", color="red") +
   annotate("text", x= gem.result.ignorant, y= 0.16, label="Ignorant", color="blue") +
   annotate("text", x= gem.result.ignorant, y= 0.15, label="Forecaster", color="blue") +
   xlim(0, 50) +
@@ -415,9 +417,9 @@ ggplot(data=total_score_better, aes(x = result, y = ..density..)) +
   geom_density(data=total_score_better, aes(x = result, y = ..density..)) +
   geom_density(data=total_score_perfect, aes(x = result, y = ..density..), color="red", linetype=2, size=0.5 ) +
   geom_density(data=total_score_ignorant, aes(x = result, y = ..density..), color="blue", linetype=2, size=0.5 ) +
-  geom_vline(xintercept=perfect_score, color="red", size=0.5, linetype=2) +
-  annotate("text", x= perfect_score, y= 0.21, label="Perfect", color="red") +
-  annotate("text", x= perfect_score, y= 0.20, label="Forecaster", color="red") +
+  geom_vline(xintercept=mu.perfect, color="red", size=0.5, linetype=2) +
+  annotate("text", x= mu.perfect, y= 0.21, label="Perfect", color="red") +
+  annotate("text", x= mu.perfect, y= 0.20, label="Forecaster", color="red") +
   annotate("text", x= gem.result.better, y= 0.19, label="Realistic", color="black") +
   annotate("text", x= gem.result.better, y= 0.18, label="Forecaster", color="black") +
   annotate("text", x= gem.result.ignorant, y= 0.15, label="Ignorant", color="blue") +
