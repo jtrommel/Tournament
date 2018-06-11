@@ -221,7 +221,7 @@ You can find the \emph{Expected Value} of the score by multiplying the possible 
   \end{split}
 \end{equation}
 
-The total average score is the sum of all the average question scores:
+The average total score of the $n$ questions is the sum of all the average question scores:
 \begin{equation}
 E(score_{total})=E(\sum_{i=1}^{i=n}score_{i})=\sum_{i=1}^{i=n}p_{i}(1-p_{i}) + \sum_{i=1}^{i=n}(q_{i}-p_{i})^{2}
 \label{eq:meantotal}
@@ -242,10 +242,35 @@ The variance of the score on question $i$ is the average value of the square of 
   \end{split}
 \end{equation}
 
-The variance of the total score is the sum of all the variances of the question scores:
+The variance of the total score of all $n$ questions is the sum of all the variances of the question scores:
 \begin{equation}
 var(score_{total})=\sum_{i=1}^{i=n}var(score_{i}))=\sum_{i=1}^{i=n}p_{i}(1-p_{i})(1-2q_{i})^{2}
 \label{eq:vartotal}
+\end{equation}
+
+\section{Expected value and variance of total score in multiple tournaments}
+Because the total score of a tournament with $n$ questions
+
+\begin{itemize}
+  \item is the sum of $n$ scores (one for each question), 
+  \item all questions are considered to be independent 
+  \item all question scores have the same weight
+\end{itemize}
+
+we can reasonably conclude that the Central Limit Theorem is applicable which states that under these conditions the total score of $n$ questions will be approximately normally distributed with parameters $\mu=E(score_{total}$ and $\sigma=\sqrt{var(score_{total}}$.
+
+However, when we have multiple ($N$) tournaments the values of $q_{i}$ can be different in each tournament. This depends on the model that we will use to simulate the decisions of the forecaster. We therefore adapt our formulas, adding the index $j \quad (j=1 \ldots N)$, where $j$ indicates the tournament number.
+
+The average of the total score of tournament $j$ is:
+\begin{equation}
+E_{j}(score_{total})=\sum_{i=1}^{i=n}p_{i}(1-p_{i}) + \sum_{i=1}^{i=n}(q_{i,j}-p_{i})^{2}
+\label{eq:meantournament}
+\end{equation}
+
+The variance of the total score of tournament $j$ is::
+\begin{equation}
+var_{j}(score_{total})=\sum_{i=1}^{i=n}p_{i}(1-p_{i})(1-2q_{i,j})^{2}
+\label{eq:vartournament}
 \end{equation}
 
 \chapter{A tale of three forecasters}
@@ -253,9 +278,9 @@ var(score_{total})=\sum_{i=1}^{i=n}var(score_{i}))=\sum_{i=1}^{i=n}p_{i}(1-p_{i}
 We are going to look at the scores of three different forecasters. Each forecaster will take part in N tournaments\sidenote{N can be very large e.g. 10.000. It's just the computer doing all the work}. Each tournament has 100 question: 10 questions about events with a probability of occurence $p=0.05$, 10 questions with probability of occurence $p=0.15$, and so on in steps of $0.10$, until the last set of 10 questions about events with probability of occurence $p=0.95$.
 
 \section{The Perfect Forecaster}
-This forecaster is faultless: for every question she ''knows" the exact probability. So for every question her choice $q_{i}$ of the probability of occurence ot the event is exactly equal to $p_{i}$. 
+This forecaster is faultless: for every question she ''knows" the exact probability. So for every question her choice $q_{i,j}$ of the probability of occurence ot the event is exactly equal to $p_{i}$. 
 
-We can calculate the expected value and the variance of the total score of the Perfect Forecaster using Equation~\ref{eq:meantotal}. The second term in the equation for the expected value is 0 because the Perfect Forecaster always chooses $q_{i}=p_{i}$:
+We can calculate the expected value and the variance of the total score of the Perfect Forecaster using Equation~\ref{eq:meantournament} and Equation~\ref{eq:vartournament}. We get:
 \begin{equation}
 \label{eq:perfect}
   \begin{split}
@@ -264,9 +289,11 @@ We can calculate the expected value and the variance of the total score of the P
   \end{split}
 \end{equation}
 
+As we can see $q_{i,j}$ is not present any more. As the values of $p_{i}$ are known, all tournaments will have the same average value and the same variance.
+
 <<echo=FALSE>>=
 Aldous <- TRUE
-N <- 1000 # number of tournaments
+N <- 2000 # number of tournaments
 n <- 100 # number of questions per tournament
 prob.event <- seq(0.05, 0.95, by=0.1) # sequence of true probabilities
 @
@@ -291,7 +318,7 @@ norm.perfect <- data.frame(x=seq(10,30,by=0.1),y =0)
 norm.perfect$y <- dnorm(norm.perfect$x,mu.perfect,std.perfect)
 ggplot() +
   geom_histogram(data=total_score_perfect, aes(x = result, y = ..density..), 
-                 binwidth=1, fill="lightblue", color="grey60", size=0.2) +
+                 binwidth=0.5, fill="lightpink1",  size=0.2) +
   geom_density(data=total_score_perfect, aes(x = result, y = ..density..)) +
   geom_line(data=norm.perfect, aes(x=x,y=y), color="red", size=1) +
   geom_vline(xintercept=mu.perfect, color="red", size=0.8) +
@@ -321,12 +348,12 @@ Her average total score is given by Equation~\ref{eq:meantotal} and the variance
 \begin{equation}
 \label{eq:ignorant}
   \begin{split}
-E(S_{ignorant})&=\sum_{i=1}^{i=n}p_{i}(1-p_{i}) + \sum_{i=1}^{i=n}(q_{i}-p_{i})^{2} = E(S_{perfect}) + \sum_{i=1}^{i=n}(q_{i}-p_{i})^{2} \\
-var(S_{ignorant})&=\sum_{i=1}^{i=n}p_{i}(1-p_{i})(1-2q_{i})^{2}
+E_{j}(S_{ignorant})&=\sum_{i=1}^{i=n}p_{i}(1-p_{i}) + \sum_{i=1}^{i=n}(q_{i,j}-p_{i})^{2} = E(S_{perfect}) + \sum_{i=1}^{i=n}(q_{i}-p_{i})^{2} \\
+var_{j}(S_{ignorant})&=\sum_{i=1}^{i=n}p_{i}(1-p_{i})(1-2q_{i,j})^{2}
   \end{split}
 \end{equation}
 
-Because the second term is always positive in the first equation, the average total score of the Ignorant Forecaster will always be higher that the average score of the Perfect Forecaster\sidenote{Both equations depend on the values of $q_{i}$, which means that when we rerun the simulations, we will get other values of $q_{i}$ and therefore other values for the expected value of the total score and for the variance of the total score}.
+Because the second term in the first equation is always positive, the average total score of the Ignorant Forecaster will always be higher that the average score of the Perfect Forecaster. Both equations depend on the values of $q_{i,j}$, which means that when we rerun the simulations in another tournament, we will get other values of $q_{i,j}$ and therefore other values for the expected value of the total score and for the variance of the total score.
 
 <<label=Ignorant,fig=TRUE,include=FALSE, echo=FALSE>>=
 set.seed(2018) # setting the random number generator
